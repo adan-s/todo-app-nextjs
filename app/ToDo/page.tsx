@@ -1,8 +1,8 @@
-import SignUp from '@/components/SignUp'
+import ToDo from '@/components/ToDo'
 export default function page() {
   return (
     <main> 
-     <SignUp />
+     <ToDo/>
     </main>
   );
 }

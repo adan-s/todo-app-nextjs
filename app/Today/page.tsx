@@ -1,8 +1,9 @@
-import SignUp from '@/components/SignUp'
+import Today from "@/components/Today";
+
 export default function page() {
   return (
     <main> 
-     <SignUp />
+     <Today/>
     </main>
   );
 }

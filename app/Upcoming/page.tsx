@@ -1,8 +1,9 @@
-import SignUp from '@/components/SignUp'
+import Upcoming from "@/components/Upcoming";
+
 export default function page() {
   return (
     <main> 
-     <SignUp />
+     <Upcoming/>
     </main>
   );
 }
