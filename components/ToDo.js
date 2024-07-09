@@ -6,11 +6,9 @@ import Upcoming from './Upcoming'
 import Today from './Today'
 import {
   CalendarIcon,
-  ClipboardCheckIcon,
   UserCircleIcon,
   BriefcaseIcon,
   LogoutIcon,
-  CollectionIcon,
   DotsCircleHorizontalIcon,
   CheckIcon,
   InboxInIcon,
@@ -151,15 +149,10 @@ const ToDo = () => {
         <Upcoming/>
         )}
 
-
-
        {/* Today Area */}
        {currentView === 'today' && (
         <Today/>
         )}
-
-
-    
 
       {isFormOpen && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
