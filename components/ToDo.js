@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Upcoming from './Upcoming'
 import Today from './Today'
 import {
-  CalendarIcon,
   UserCircleIcon,
   BriefcaseIcon,
   LogoutIcon,
@@ -13,38 +12,20 @@ import {
   CheckIcon,
   InboxInIcon,
 } from "@heroicons/react/outline";
+import Work from "./Work";
+import Personal from "./Personal";
+import Other from "./Other";
 
 const ToDo = () => {
   const router = useRouter();
-  const [isFormOpen, setIsFormOpen] = useState(false);
   const [currentView, setCurrentView] = useState("upcoming");
-  const [formData, setFormData] = useState({
-    title: "",
-    desc: "",
-    duedate: "",
-    status: "New",
-    category: "Work",
-  });
 
   const handleSignOut = (e) => {
     e.preventDefault();
     router.push("/SignIn");
   };
 
-  const handleFormChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }));
-  };
 
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    //logic to submit form data
-    console.log(formData);
-    setIsFormOpen(false);
-  };
 
   return (
     <div className="container flex h-screen">
@@ -66,7 +47,7 @@ const ToDo = () => {
                 onClick={() => setCurrentView("upcoming")}
               >
                 <a
-                  href=""
+                href="#"
                   className="text-black hover:text-orange-800 flex items-center"
                 >
                   <InboxInIcon className="h-5 w-5 mr-2 text-gray-500" />
@@ -80,22 +61,14 @@ const ToDo = () => {
                 onClick={() => setCurrentView("today")}
               >
                 <a
-                  href="#"
+                href="#"
                   className="text-black hover:text-orange-800 flex items-center"
                 >
                   <CheckIcon className="h-5 w-5 mr-2 text-gray-500" />
                   Today
                 </a>
               </li>
-              <li className="py-2">
-                <a
-                  href="#"
-                  className="text-black hover:text-orange-800 flex items-center"
-                >
-                  <CalendarIcon className="h-5 w-5 mr-2 text-gray-500" />
-                  Calendar
-                </a>
-              </li>
+            
             </ul>
           </div>
           <div>
@@ -103,28 +76,37 @@ const ToDo = () => {
               Categories
             </h3>
             <ul>
-              <li className="py-2">
+              <li   className={`py-2 ${
+                  currentView === "work" ? "font-bold" : ""
+                }`}
+                onClick={() => setCurrentView("work")}>
                 <a
-                  href="#"
-                  className="text-black hover:text-green-700 flex items-center"
+                href="#"
+                  className="text-black hover:text-orange-700 flex items-center"
                 >
                   <BriefcaseIcon className="h-5 w-5 mr-2 text-gray-500" />
                   Work
                 </a>
               </li>
-              <li className="py-2">
+              <li className={`py-2 ${
+                  currentView === "personal" ? "font-bold" : ""
+                }`}
+                onClick={() => setCurrentView("personal")}>
                 <a
-                  href="#"
-                  className="text-black hover:text-green-700 flex items-center"
+                href="#"
+                  className="text-black hover:text-orange-700 flex items-center"
                 >
                   <UserCircleIcon className="h-5 w-5 mr-2 text-gray-500" />
                   Personal
                 </a>
               </li>
-              <li className="py-2">
+              <li className={`py-2 ${
+                  currentView === "other" ? "font-bold" : ""
+                }`}
+                onClick={() => setCurrentView("other")}>
                 <a
-                  href="#"
-                  className="text-black hover:text-green-700 flex items-center"
+                href="#"
+                  className="text-black hover:text-orange-700 flex items-center"
                 >
                   <DotsCircleHorizontalIcon className="h-5 w-5 mr-2 text-gray-500" />
                   Other
@@ -154,84 +136,23 @@ const ToDo = () => {
         <Today/>
         )}
 
-      {isFormOpen && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 shadow-lg">
-              <h2 className="text-2xl font-bold mb-4">Add New Task</h2>
-              <form onSubmit={handleFormSubmit}>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleFormChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="desc">
-                    Description
-                  </label>
-                  <input
-                    type="text"
-                    id="desc"
-                    name="desc"
-                    value={formData.desc}
-                    onChange={handleFormChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="duedate">
-                    Due Date
-                  </label>
-                  <input
-                    type="date"
-                    id="duedate"
-                    name="duedate"
-                    value={formData.duedate}
-                    onChange={handleFormChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="category">
-                    Category
-                  </label>
-                  <select
-                    id="category"
-                    name="category"
-                    value={formData.category}
-                    onChange={handleFormChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  >
-                    <option value="Work">Work</option>
-                    <option value="Personal">Personal</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-                <div className="flex items-center justify-between">
-                  <button
-                    type="submit"
-                    className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                  >
-                    Add Task
-                  </button>
-                  <button
-                    onClick={() => setIsFormOpen(false)}
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
+        {/* Work Area */}
+        {currentView === 'work' && (
+        <Work/>
         )}
+
+       {/* Personal Area */}
+       {currentView === 'personal' && (
+        <Personal/>
+        )}
+
+          {/* Other Area */}
+       {currentView === 'other' && (
+        <Other/>
+        )}
+
+
+    
     </div>
   );
 };
