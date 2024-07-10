@@ -1,44 +1,49 @@
-// profile.js
-
-import React, { useState, useEffect } from 'react';
-import { getUsers, updateUser } from '@/serverApi/userApi';
+import React, { useState, useEffect } from "react";
+import { getUser, updateUser } from "@/serverApi/userApi";
 
 const Profile = () => {
+  const userEmail = JSON.parse(localStorage.getItem("loggedInUser"));
   const [user, setUser] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [updatedUser, setUpdatedUser] = useState({});
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUserId = async () => {
       try {
-        const users = await getUsers();
-        // Assuming you have a way to identify the currently logged-in user, for example, based on session or token
-        // Here, we assume the first user in the fetched users array is the logged-in user
-        setUser(users[0]); 
+        const User = await getUser(userEmail);
+        setUser(User);
+        setUpdatedUser({
+          username: User.username,
+          email: User.email,
+          password: "",
+        });
+        console.log("userid:", User);
       } catch (error) {
-        console.error('Error fetching user data:', error);
-        setError('Error fetching user data. Please try again.');
+        console.error("Error fetching User ID:", error);
+        setError("Error fetching user ID. Please try again.");
       }
     };
 
-    fetchUserData();
-  }, []);
+    fetchUserId();
+  }, [userEmail]);
 
   const handleEditClick = () => {
     setEditMode(true);
-    // Initialize updatedUser state with current user data for editing
-    setUpdatedUser({
-      username: user.username,
-      email: user.email,
-      password: '',
-    });
+    setSuccess("");
+    setError("");
   };
 
   const handleCancelEdit = () => {
     setEditMode(false);
-    setUpdatedUser({});
-    setError('');
+    setUpdatedUser({
+      username: user.username,
+      email: user.email,
+      password: "",
+    });
+    setSuccess("");
+    setError("");
   };
 
   const handleInputChange = (e) => {
@@ -48,16 +53,20 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!/^[a-zA-Z]+$/.test(updatedUser.username)) {
+      setError("Username must contain alphabets.");
+      return;
+    }
 
     try {
-      await updateUser(user.id, updatedUser); 
+      await updateUser(user.id, updatedUser);
       setEditMode(false);
-      setError('');
-      
-      alert('Profile updated successfully!');
+      setError("");
+      setSuccess("Profile updated successfully!");
     } catch (error) {
-      console.error('Error updating user profile:', error);
-      setError('Error updating user profile. Please try again.');
+      console.error("Error updating user profile:", error);
+      setSuccess("");
+      setError("Error updating user profile. Please try again.");
     }
   };
 
@@ -66,50 +75,67 @@ const Profile = () => {
   }
 
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex h-screen w-screen p-10">
       <div className="container mx-auto p-4 md:p-6 lg:p-12">
-        <main className="flex flex-col items-center justify-center w-full">
-          <div className="bg-white rounded-lg shadow-lg p-10 w-94">
+        <main className="flex flex-col items-center justify-center  w-full">
+          <div className="bg-white rounded-lg shadow-lg p-10 h-full w-full">
             <h2 className="text-4xl font-bold mb-6">User Profile</h2>
-            {error && <p className="text-red-500 mb-4">{error}</p>}
+            {error && (
+              <p className="text-red-500 mb-4 p-2 border border-red-500 rounded">
+                {error}
+              </p>
+            )}
+            {success && (
+              <p className="text-green-500 mb-4 p-2 border border-green-500 rounded">
+                {success}
+              </p>
+            )}
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="username"
+              >
                 Username
               </label>
               <input
                 type="text"
                 id="username"
                 name="username"
-                value={updatedUser.username || ''}
+                value={updatedUser.username || ""}
                 onChange={handleInputChange}
                 disabled={!editMode}
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               />
             </div>
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="email"
+              >
                 Email
               </label>
               <input
                 type="email"
                 id="email"
                 name="email"
-                value={updatedUser.email || ''}
-                onChange={handleInputChange}
-                disabled={!editMode}
+                value={updatedUser.email || ""}
+                disabled
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               />
             </div>
             {editMode && (
               <div className="mb-6">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="password"
+                >
                   New Password
                 </label>
                 <input
                   type="password"
                   id="password"
                   name="password"
-                  value={updatedUser.password || ''}
+                  value={updatedUser.password || ""}
                   onChange={handleInputChange}
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
@@ -127,7 +153,7 @@ const Profile = () => {
                 <>
                   <button
                     onClick={handleSubmit}
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-5 rounded"
+                    className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-3 px-5 rounded"
                   >
                     Save
                   </button>

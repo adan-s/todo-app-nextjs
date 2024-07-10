@@ -21,6 +21,19 @@ export async function findUser(usernameOrEmail: string): Promise<string | null> 
   }
 }
 
+export async function getUser(usernameOrEmail: string): Promise<string | null> {
+  const users = await getUsers();
+
+  const user = users.find((user:User) => user.email === usernameOrEmail || user.email === usernameOrEmail);
+
+  if (user) {
+    return user;
+  } else {
+    return null;
+  }
+}
+
+
 export async function getUsers() {
   const data = await fetch(`${serverUrl}/users`);
   const resultJson = await data.json();

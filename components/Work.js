@@ -1,10 +1,14 @@
-"use client"
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { getTasks, addTask, updateTask } from "@/serverApi/taskApi";
+import { findUser } from "@/serverApi/userApi";
 
 const Work = () => {
-
+  const userEmail = JSON.parse(localStorage.getItem("loggedInUser"));
+  const [userId, setUserId] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     desc: "",
@@ -12,13 +16,35 @@ const Work = () => {
     status: "New",
     category: "Work",
   });
-  const [tasks, setTasks] = useState([
-    { id: 1, title: "Research content ideas", desc: "", duedate: "", status: "New", category: "Work" },
-    { id: 2, title: "Create a database of guest authors", desc: "", duedate: "", status: "New", category: "Work" },
-    { id: 3, title: "Renew driver's license", desc: "", duedate: "", status: "New", category: "Personal" },
-    { id: 4, title: "Consult accountant", desc: "", duedate: "", status: "New", category: "Personal" },
-  ]);
-  const [selectedTask, setSelectedTask] = useState(null);
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const id = await findUser(userEmail);
+        setUserId(id);
+        console.log("userid:", id);
+      } catch (error) {
+        console.error("Error fetching user ID:", error);
+        setError("Error fetching user ID. Please try again.");
+      }
+    };
+
+    fetchUserId();
+  }, [userEmail]);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const fetchedTasks = await getTasks();
+        setTasks(fetchedTasks || []);
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+        setError("Error fetching tasks. Please try again.");
+      }
+    };
+
+    fetchTasks();
+  }, []);
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -28,33 +54,79 @@ const Work = () => {
     }));
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (selectedTask) {
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === selectedTask.id ? { ...selectedTask, ...formData } : task
-        )
-      );
-    } else {
-      setTasks([...tasks, { ...formData, id: tasks.length + 1 }]);
+
+    // Basic validation checks
+    if (formData.title.trim() === "" || formData.desc.trim() === "" || formData.duedate === "") {
+      setError("All fields are required.");
+      return;
     }
-    setIsFormOpen(false);
-    setFormData({
-      title: "",
-      desc: "",
-      duedate: "",
-      status: "New",
-      category: "Work",
-    });
-    setSelectedTask(null);
+
+    const currentDate = new Date().toISOString().split('T')[0];
+    if (formData.duedate < currentDate) {
+      setError("Due date cannot be earlier than the current date.");
+      return;
+    }
+
+    try {
+      console.log("Form data before submission:", formData);
+      if (selectedTask) {
+        const updatedTask = await updateTask(
+          selectedTask.id,
+          formData.category,
+          {
+            title: formData.title,
+            description: formData.desc,
+            duedate: formData.duedate,
+            status: formData.status,
+          },
+          userId
+        );
+        setTasks(tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)));
+
+        console.log("Updated task:", updatedTask);
+      } else {
+        const newTask = await addTask(
+          formData.title,
+          formData.desc,
+          formData.duedate,
+          formData.status,
+          formData.category,
+          userId
+        );
+        setTasks([...tasks, newTask]);
+      }
+
+      setIsFormOpen(false);
+      setFormData({
+        title: "",
+        desc: "",
+        duedate: "",
+        status: "New",
+        category: "Work",
+      });
+      setSelectedTask(null);
+      setError("");
+    } catch (error) {
+      console.error("Error adding/editing task:", error.message);
+      setError("Error adding/editing task. Please try again.");
+    }
   };
 
   const handleEditTask = (task) => {
     setSelectedTask(task);
-    setFormData(task);
+    setFormData({
+      title: task.title,
+      desc: task.description,
+      duedate: task.duedate,
+      status: task.status,
+      category: task.category_name,
+    });
     setIsFormOpen(true);
   };
+
+  const WorkTasks = tasks.filter(task => task.category_name === "Work");
 
   return (
     <div className="container mx-auto p-10">
@@ -72,49 +144,62 @@ const Work = () => {
             });
             setIsFormOpen(true);
           }}
-          className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline "
+          className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           + Add New Task
         </button>
       </div>
 
-      {/* Work's Tasks */}
-      <div className="bg-white rounded-lg shadow-md p-10 mb-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Tasks</h2>
-        <ul className="list-disc">
-          {tasks.map((task) => (
-            <li key={task.id} className="flex items-center justify-between mb-2">
-              <span className="flex items-center">
-                <input type="checkbox" className="mr-2" />
-                <span>{task.title}</span>
-              </span>
-              <svg
-                onClick={() => handleEditTask(task)}
-                className="w-6 h-6 cursor-pointer"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
+      {/* Display Work Tasks */}
+      {WorkTasks.length === 0 ? (
+        <p>No tasks</p>
+      ) : (
+        <div className="bg-white rounded-lg shadow-md p-10 mb-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Tasks</h2>
+          <ul className="list-disc">
+            {WorkTasks.map((task) => (
+              <li
+                key={task.id}
+                className="flex items-center justify-between mb-2"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            </li>
-          ))}
-        </ul>
-      </div>
+                <span className="flex items-center">
+                  <input type="checkbox" className="mr-2" />
+                  <span>{task.title}</span>
+                </span>
+                <svg
+                  onClick={() => handleEditTask(task)}
+                  className="w-6 h-6 cursor-pointer"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
+                </svg>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
+      {/* Popup Form */}
       {isFormOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 shadow-lg">
-            <h2 className="text-2xl font-bold mb-4">{selectedTask ? "Edit Task" : "Add New Task"}</h2>
+            <h2 className="text-2xl font-bold mb-4">
+              {selectedTask ? "Edit Task" : "Add New Task"}
+            </h2>
             <form onSubmit={handleFormSubmit}>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="title"
+                >
                   Title
                 </label>
                 <input
@@ -123,11 +208,19 @@ const Work = () => {
                   name="title"
                   value={formData.title}
                   onChange={handleFormChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                    error && formData.title.trim() === "" ? "border-red-500" : ""
+                  }`}
                 />
+                {error && formData.title.trim() === "" && (
+                  <p className="text-red-500 text-xs italic">Title is required.</p>
+                )}
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="desc">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="desc"
+                >
                   Description
                 </label>
                 <input
@@ -136,11 +229,19 @@ const Work = () => {
                   name="desc"
                   value={formData.desc}
                   onChange={handleFormChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                    error && formData.desc.trim() === "" ? "border-red-500" : ""
+                  }`}
                 />
+                {error && formData.desc.trim() === "" && (
+                  <p className="text-red-500 text-xs italic">Description is required.</p>
+                )}
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="duedate">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="duedate"
+                >
                   Due Date
                 </label>
                 <input
@@ -149,11 +250,22 @@ const Work = () => {
                   name="duedate"
                   value={formData.duedate}
                   onChange={handleFormChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                    error && formData.duedate === "" ? "border-red-500" : ""
+                  }`}
                 />
+                {error && formData.duedate === "" && (
+                  <p className="text-red-500 text-xs italic">Due date is required.</p>
+                )}
+                {error && formData.duedate < new Date().toISOString().split('T')[0] && (
+                  <p className="text-red-500 text-xs italic">Due date cannot be earlier than the current date.</p>
+                )}
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="status">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="status"
+                >
                   Status
                 </label>
                 <select
@@ -169,7 +281,10 @@ const Work = () => {
                 </select>
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="category">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="category"
+                >
                   Category
                 </label>
                 <select
@@ -180,7 +295,7 @@ const Work = () => {
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 >
                   <option value="Work">Work</option>
-                  <option value="Personal">Personal</option>
+                  <option value="Work">Work</option>
                   <option value="Other">Other</option>
                 </select>
               </div>

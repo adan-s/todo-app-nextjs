@@ -57,6 +57,18 @@ const Upcoming = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
+    // Basic validation checks
+    if (formData.title.trim() === "" || formData.desc.trim() === "" || formData.duedate === "") {
+      setError("All fields are required.");
+      return;
+    }
+
+    const currentDate = new Date().toISOString().split('T')[0];
+    if (formData.duedate < currentDate) {
+      setError("Due date cannot be earlier than the current date.");
+      return;
+    }
+
     try {
       console.log("Form data before submission:", formData);
       if (selectedTask) {
@@ -95,6 +107,7 @@ const Upcoming = () => {
         category: "Work",
       });
       setSelectedTask(null);
+      setError(""); // Clear any previous errors
     } catch (error) {
       console.error("Error adding/editing task:", error.message);
       setError("Error adding/editing task. Please try again.");
@@ -112,10 +125,6 @@ const Upcoming = () => {
     });
     setIsFormOpen(true);
   };
-
-  if (error) {
-    return <p>Error: {error}</p>;
-  }
 
   return (
     <div className="container mx-auto p-10">
@@ -197,8 +206,13 @@ const Upcoming = () => {
                   name="title"
                   value={formData.title}
                   onChange={handleFormChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                    error && formData.title.trim() === "" ? "border-red-500" : ""
+                  }`}
                 />
+                {error && formData.title.trim() === "" && (
+                  <p className="text-red-500 text-xs italic">Title is required.</p>
+                )}
               </div>
               <div className="mb-4">
                 <label
@@ -213,8 +227,13 @@ const Upcoming = () => {
                   name="desc"
                   value={formData.desc}
                   onChange={handleFormChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                    error && formData.desc.trim() === "" ? "border-red-500" : ""
+                  }`}
                 />
+                {error && formData.desc.trim() === "" && (
+                  <p className="text-red-500 text-xs italic">Description is required.</p>
+                )}
               </div>
               <div className="mb-4">
                 <label
@@ -229,8 +248,16 @@ const Upcoming = () => {
                   name="duedate"
                   value={formData.duedate}
                   onChange={handleFormChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                    error && formData.duedate === "" ? "border-red-500" : ""
+                  }`}
                 />
+                {error && formData.duedate === "" && (
+                  <p className="text-red-500 text-xs italic">Due date is required.</p>
+                )}
+                {error && formData.duedate < new Date().toISOString().split('T')[0] && (
+                  <p className="text-red-500 text-xs italic">Due date cannot be earlier than the current date.</p>
+                )}
               </div>
               <div className="mb-4">
                 <label
