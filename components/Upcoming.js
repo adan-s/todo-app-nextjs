@@ -1,9 +1,14 @@
-"use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { getTasks, addTask, updateTask } from "@/serverApi/taskApi";
+import { findUser } from "@/serverApi/userApi";
 
 const Upcoming = () => {
+  const userEmail = JSON.parse(localStorage.getItem("loggedInUser"));
+  const [userId, setUserId] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     desc: "",
@@ -11,13 +16,35 @@ const Upcoming = () => {
     status: "New",
     category: "Work",
   });
-  const [tasks, setTasks] = useState([
-    { id: 1, title: "Research content ideas", desc: "", duedate: "", status: "New", category: "Work" },
-    { id: 2, title: "Create a database of guest authors", desc: "", duedate: "", status: "New", category: "Work" },
-    { id: 3, title: "Renew driver's license", desc: "", duedate: "", status: "New", category: "Personal" },
-    { id: 4, title: "Consult accountant", desc: "", duedate: "", status: "New", category: "Personal" },
-  ]);
-  const [selectedTask, setSelectedTask] = useState(null);
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const id = await findUser(userEmail);
+        setUserId(id);
+        console.log("userid:", id);
+      } catch (error) {
+        console.error("Error fetching user ID:", error);
+        setError("Error fetching user ID. Please try again.");
+      }
+    };
+
+    fetchUserId();
+  }, [userEmail]);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const fetchedTasks = await getTasks();
+        setTasks(fetchedTasks || []);
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+        setError("Error fetching tasks. Please try again.");
+      }
+    };
+
+    fetchTasks();
+  }, []);
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -27,33 +54,69 @@ const Upcoming = () => {
     }));
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
-    if (selectedTask) {
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === selectedTask.id ? { ...selectedTask, ...formData } : task
-        )
-      );
-    } else {
-      setTasks([...tasks, { ...formData, id: tasks.length + 1 }]);
+
+    try {
+      console.log("Form data before submission:", formData);
+      if (selectedTask) {
+        const updatedTask = await updateTask(
+          selectedTask.id,
+          formData.category,
+          {
+            title: formData.title,
+            description: formData.desc,
+            duedate: formData.duedate,
+            status: formData.status,
+          },
+          userId
+        );
+        setTasks(tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)));
+
+        console.log("Update task:", updatedTask);
+      } else {
+        const newTask = await addTask(
+          formData.title,
+          formData.desc,
+          formData.duedate,
+          formData.status,
+          formData.category,
+          userId
+        );
+        setTasks([...tasks, newTask]);
+      }
+
+      setIsFormOpen(false);
+      setFormData({
+        title: "",
+        desc: "",
+        duedate: "",
+        status: "New",
+        category: "Work",
+      });
+      setSelectedTask(null);
+    } catch (error) {
+      console.error("Error adding/editing task:", error.message);
+      setError("Error adding/editing task. Please try again.");
     }
-    setIsFormOpen(false);
-    setFormData({
-      title: "",
-      desc: "",
-      duedate: "",
-      status: "New",
-      category: "Work",
-    });
-    setSelectedTask(null);
   };
 
   const handleEditTask = (task) => {
     setSelectedTask(task);
-    setFormData(task);
+    setFormData({
+      title: task.title,
+      desc: task.description,
+      duedate: task.duedate,
+      status: task.status,
+      category: task.category_name,
+    });
     setIsFormOpen(true);
   };
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
+
 
   return (
     <div className="container mx-auto p-10">
@@ -71,140 +134,24 @@ const Upcoming = () => {
             });
             setIsFormOpen(true);
           }}
-          className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline "
+          className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           + Add New Task
         </button>
       </div>
 
-      {/* Upcoming Tasks */}
-      <div className="bg-white rounded-lg shadow-md p-10 mb-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Today</h2>
-        <ul className="list-disc">
-          {tasks.map((task) => (
-            <li key={task.id} className="flex items-center justify-between mb-2">
-              <span className="flex items-center">
-                <input type="checkbox" className="mr-2" />
-                <span>{task.title}</span>
-              </span>
-              <svg
-                onClick={() => handleEditTask(task)}
-                className="w-6 h-6 cursor-pointer"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Tomorrow's Tasks */}
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Tomorrow</h2>
-          <ul className="list-disc">
-            <li className="flex items-center justify-between mb-2">
-              <span className="flex items-center">
-                <input type="checkbox" className="mr-2" />
-                <span>Create job posting for SEO specialist</span>
-              </span>
-              <svg
-                onClick={() => handleEditTask({ id: 0, title: "Create job posting for SEO specialist", desc: "", duedate: "", status: "New", category: "Work" })}
-                className="w-6 h-6 cursor-pointer"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            </li>
-            <li className="flex items-center justify-between mb-2">
-              <span className="flex items-center">
-                <input type="checkbox" className="mr-2" />
-                <span>Follow up with pending emails</span>
-              </span>
-              <svg
-                onClick={() => handleEditTask({ id: 0, title: "Follow up with pending emails", desc: "", duedate: "", status: "New", category: "Work" })}
-                className="w-6 h-6 cursor-pointer"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            </li>
-            <li className="flex items-center justify-between mb-2">
-              <span className="flex items-center">
-                <input type="checkbox" className="mr-2" />
-                <span>Write blog post on AI trends</span>
-              </span>
-              <svg
-                onClick={() => handleEditTask({ id: 0, title: "Write blog post on AI trends", desc: "", duedate: "", status: "New", category: "Work" })}
-                className="w-6 h-6 cursor-pointer"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            </li>
-            <li className="flex items-center justify-between mb-2">
-              <span className="flex items-center">
-                <input type="checkbox" className="mr-2" />
-                <span>Prepare slides for presentation</span>
-              </span>
-              <svg
-                onClick={() => handleEditTask({ id: 0, title: "Prepare slides for presentation", desc: "", duedate: "", status: "New", category: "Work" })}
-                className="w-6 h-6 cursor-pointer"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 8l4 4m0 0l-4 4m4-4H3"
-                />
-              </svg>
-            </li>
-          </ul>
-        </div>
-
-        {/* This Week's Tasks */}
-        <div className="bg-white rounded-lg shadow-md p-4">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">This Week</h2>
+      {/* Display Tasks */}
+      {tasks.length === 0 ? (
+        <p>No tasks</p>
+      ) : (
+        <div className="bg-white rounded-lg shadow-md p-10 mb-6">
+          <h2 className="text-xl font-bold text-gray-800 mb-4">Today</h2>
           <ul className="list-disc">
             {tasks.map((task) => (
-              <li key={task.id} className="flex items-center justify-between mb-2">
+              <li
+                key={task.id}
+                className="flex items-center justify-between mb-2"
+              >
                 <span className="flex items-center">
                   <input type="checkbox" className="mr-2" />
                   <span>{task.title}</span>
@@ -228,16 +175,21 @@ const Upcoming = () => {
             ))}
           </ul>
         </div>
-      </div>
+      )}
 
       {/* Popup Form */}
       {isFormOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 shadow-lg">
-            <h2 className="text-2xl font-bold mb-4">{selectedTask ? "Edit Task" : "Add New Task"}</h2>
+            <h2 className="text-2xl font-bold mb-4">
+              {selectedTask ? "Edit Task" : "Add New Task"}
+            </h2>
             <form onSubmit={handleFormSubmit}>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="title">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="title"
+                >
                   Title
                 </label>
                 <input
@@ -250,7 +202,10 @@ const Upcoming = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="desc">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="desc"
+                >
                   Description
                 </label>
                 <input
@@ -263,7 +218,10 @@ const Upcoming = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="duedate">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="duedate"
+                >
                   Due Date
                 </label>
                 <input
@@ -276,7 +234,10 @@ const Upcoming = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="status">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="status"
+                >
                   Status
                 </label>
                 <select
@@ -292,7 +253,10 @@ const Upcoming = () => {
                 </select>
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="category">
+                <label
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="category"
+                >
                   Category
                 </label>
                 <select

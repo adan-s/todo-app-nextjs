@@ -4,6 +4,11 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Upcoming from "./Upcoming";
 import Today from "./Today";
+import Work from "./Work";
+import Personal from "./Personal";
+import Other from "./Other";
+import { getCategory } from "@/serverApi/categoryApi";
+import Profile from "./Profile";
 import {
   UserCircleIcon,
   BriefcaseIcon,
@@ -11,11 +16,8 @@ import {
   DotsCircleHorizontalIcon,
   CheckIcon,
   InboxInIcon,
+  UserIcon,
 } from "@heroicons/react/outline";
-import Work from "./Work";
-import Personal from "./Personal";
-import Other from "./Other";
-import { getCategory } from "@/serverApi/categoryApi";
 
 const ToDo = () => {
   const router = useRouter();
@@ -146,6 +148,32 @@ const ToDo = () => {
               ))}
             </ul>
           </div>
+          <div>
+          <h3 className="text-lg font-semibold text-black mb-2 flex items-center">
+              Account
+            </h3>
+            <ul>
+            <li
+                className={`py-2 ${
+                  currentView === "profile"
+                    ? "font-bold text-orange-500 "
+                    : "text-black "
+                }`}
+                onClick={() => setCurrentView("profile")}
+              >
+                <a href="#" className="flex items-center">
+                  <UserIcon
+                    className={`h-5 w-5 mr-2  ${
+                      currentView === "profile"
+                        ? "text-orange-500"
+                        : "text-gray-500"
+                    }`}
+                  />
+                  Profile
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
         <div className="mt-auto">
           <button
@@ -172,6 +200,10 @@ const ToDo = () => {
 
       {/* Other Area */}
       {currentView === "other" && <Other />}
+
+       {/* Profile Area */}
+       {currentView === "profile" && <Profile />}
+
     </div>
   );
 };

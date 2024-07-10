@@ -29,9 +29,12 @@ const SignIn = () => {
 
   useEffect(() => {
     if (isLoggedIn) {
+      localStorage.setItem('loggedInUser', JSON.stringify(email));
       router.push('/ToDo');
+    } else {
+      localStorage.removeItem('loggedInUser');
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, email]);
 
   const handleSignUpClick = (e) => {
     e.preventDefault();
