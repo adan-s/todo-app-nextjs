@@ -9,10 +9,33 @@ interface Category {
   user_id: number;
 }
 
+interface Task {
+  id: number;
+  title: string;
+  description: string;
+  duedate: Date;
+  status: string;
+  category_id: number;
+  user_id: number;
+  category_name?: string; 
+}
+
 export async function getTasks() {
-  const data = await fetch(`${serverUrl}/tasks`);
-  const resultJson = await data.json();
-  return resultJson;
+  const tasksData = await fetch(`${serverUrl}/tasks`);
+  const tasks: Task[] = await tasksData.json();
+
+  const categoriesData = await fetch(`${serverUrl}/category`);
+  const categories: Category[] = await categoriesData.json();
+
+  const tasksWithCategoryName = tasks.map((task) => {
+    const category = categories.find((cat) => cat.id === task.category_id);
+    return {
+      ...task,
+      category_name: category ? category.category_name : "Unknown",
+    };
+  });
+
+  return tasksWithCategoryName;
 }
 
 export async function addTask(
@@ -21,12 +44,12 @@ export async function addTask(
   duedate: Date,
   status: string,
   category_name: string,
-  userId: number 
+  userId: number
 ) {
   const categoriesData = await fetch(`${serverUrl}/category`);
-  const resultJson: Category[] = await categoriesData.json();
+  const categories: Category[] = await categoriesData.json();
 
-  const category = resultJson.find((cat) => cat.category_name === category_name);
+  const category = categories.find((cat) => cat.category_name === category_name);
 
   if (!category) {
     throw new Error(`Category '${category_name}' not found.`);
@@ -43,7 +66,7 @@ export async function addTask(
     user_id: userId,
   };
 
-  console.log("requestBody",requestBody)
+  console.log("requestBody", requestBody);
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -64,17 +87,17 @@ export async function updateTask(
   taskId: string,
   category_name: string,
   updatedTaskData: {
-    title: string,
-    description: string,
-    duedate: Date,
-    status: string,
+    title: string;
+    description: string;
+    duedate: Date;
+    status: string;
   },
   userId: number
 ): Promise<any> {
   const categoriesData = await fetch(`${serverUrl}/category`);
-  const resultJson: Category[] = await categoriesData.json();
+  const categories: Category[] = await categoriesData.json();
 
-  const category = resultJson.find((cat) => cat.category_name === category_name);
+  const category = categories.find((cat) => cat.category_name === category_name);
 
   if (!category) {
     throw new Error(`Category '${category_name}' not found.`);
@@ -85,7 +108,7 @@ export async function updateTask(
   const requestBody = {
     ...updatedTaskData,
     category_id: category.id,
-    user_id: userId, 
+    user_id: userId,
   };
 
   console.log(requestBody);

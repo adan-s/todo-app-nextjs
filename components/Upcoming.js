@@ -73,7 +73,7 @@ const Upcoming = () => {
         );
         setTasks(tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)));
 
-        console.log("Update task:", updatedTask);
+        console.log("Updated task:", updatedTask);
       } else {
         const newTask = await addTask(
           formData.title,
@@ -116,7 +116,6 @@ const Upcoming = () => {
   if (error) {
     return <p>Error: {error}</p>;
   }
-
 
   return (
     <div className="container mx-auto p-10">
