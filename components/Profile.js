@@ -75,9 +75,9 @@ const Profile = () => {
   }
 
   return (
-    <div className="flex h-screen w-screen p-10">
-      <div className="container mx-auto p-4 md:p-6 lg:p-12">
-        <main className="flex flex-col items-center justify-center  w-full">
+    <div className=" h-screen w-screen">
+      <div className="container  p-4 md:p-6 lg:p-12">
+        <main className="flex flex-col items-center justify-center ">
           <div className="bg-white rounded-lg shadow-lg p-10 h-full w-full">
             <h2 className="text-4xl font-bold mb-6">User Profile</h2>
             {error && (
