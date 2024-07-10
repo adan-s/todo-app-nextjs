@@ -75,99 +75,98 @@ const Profile = () => {
   }
 
   return (
-    <div className=" h-screen w-screen">
-      <div className="container  p-4 md:p-6 lg:p-12">
-        <main className="flex flex-col items-center justify-center ">
-          <div className="bg-white rounded-lg shadow-lg p-10 h-full w-full">
-            <h2 className="text-4xl font-bold mb-6">User Profile</h2>
-            {error && (
-              <p className="text-red-500 mb-4 p-2 border border-red-500 rounded">
-                {error}
-              </p>
-            )}
-            {success && (
-              <p className="text-green-500 mb-4 p-2 border border-green-500 rounded">
-                {success}
-              </p>
-            )}
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="username"
-              >
-                Username
-              </label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={updatedUser.username || ""}
-                onChange={handleInputChange}
-                disabled={!editMode}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                className="block text-gray-700 text-sm font-bold mb-2"
-                htmlFor="email"
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={updatedUser.email || ""}
-                disabled
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-            </div>
-            {editMode && (
-              <div className="mb-6">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="password"
-                >
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={updatedUser.password || ""}
-                  onChange={handleInputChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-            )}
-            <div className="flex items-center justify-between">
-              {!editMode ? (
-                <button
-                  onClick={handleEditClick}
-                  className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-3 px-5 rounded"
-                >
-                  Edit
-                </button>
-              ) : (
-                <>
-                  <button
-                    onClick={handleSubmit}
-                    className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-3 px-5 rounded"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={handleCancelEdit}
-                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-5 rounded"
-                  >
-                    Cancel
-                  </button>
-                </>
-              )}
-            </div>
+    <div className="container mx-auto p-10">
+      <div className="flex items-center justify-center mb-2">
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">User Profile</h1>
+        <button
+          onClick={handleEditClick}
+          className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+        >
+          Edit
+        </button>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-lg p-10 mb-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Profile Details</h2>
+        {error && (
+          <p className="text-red-500 mb-4 p-2 border border-red-500 rounded">
+            {error}
+          </p>
+        )}
+        {success && (
+          <p className="text-green-500 mb-4 p-2 border border-green-500 rounded">
+            {success}
+          </p>
+        )}
+        <div className="mb-4">
+          <label
+            className="block text-gray-700 text-sm font-bold mb-2"
+            htmlFor="username"
+          >
+            Username
+          </label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            value={updatedUser.username || ""}
+            onChange={handleInputChange}
+            disabled={!editMode}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        <div className="mb-4">
+          <label
+            className="block text-gray-700 text-sm font-bold mb-2"
+            htmlFor="email"
+          >
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={updatedUser.email || ""}
+            disabled
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+        {editMode && (
+          <div className="mb-6">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="password"
+            >
+              New Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={updatedUser.password || ""}
+              onChange={handleInputChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
           </div>
-        </main>
+        )}
+        <div className="flex items-center justify-between">
+          {editMode ? (
+            <>
+              <button
+                onClick={handleSubmit}
+                className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-3 px-5 rounded"
+              >
+                Save
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-3 px-5 rounded"
+              >
+                Cancel
+              </button>
+            </>
+          ) : null}
+        </div>
       </div>
     </div>
   );

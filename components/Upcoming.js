@@ -107,7 +107,7 @@ const Upcoming = () => {
         category: "Work",
       });
       setSelectedTask(null);
-      setError(""); // Clear any previous errors
+      setError(""); 
     } catch (error) {
       console.error("Error adding/editing task:", error.message);
       setError("Error adding/editing task. Please try again.");
