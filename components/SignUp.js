@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { addUser } from '@/serverApi/userApi';
 
 const SignUp = () => {
   const router = useRouter();
@@ -8,6 +9,8 @@ const SignUp = () => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleSignInClick = (e) => {
     e.preventDefault();
@@ -18,12 +21,50 @@ const SignUp = () => {
     setShowForm(true);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Email:', email);
-    console.log('Username:', username);
-    console.log('Password:', password);
-    //logic to handle the signup
+    
+    if (!validateEmail(email)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+    if (!validateUsername(username)) {
+      setError('Username should not contain numbers.');
+      return;
+    }
+    if (!validatePassword(password)) {
+      setError('Password must be between 8 to 15 characters and include numbers.');
+      return;
+    }
+  
+    try {
+      const newUser = await addUser(username, email, password);
+      console.log('User added successfully:', newUser);
+      setSuccess('User signed up successfully!');
+      setError('');
+      setTimeout(() => {
+        router.push('/ToDo');
+      }, 2000); // Redirect after 2 seconds
+    } catch (error) {
+      console.error('Error adding user:', error);
+      setError('Error signing up. Please try again.');
+      setSuccess('');
+    }
+  };
+
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const validateUsername = (username) => {
+    const regex = /\d/;
+    return !regex.test(username);
+  };
+
+  const validatePassword = (password) => {
+    const regex = /^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]{8,15})$/;
+    return regex.test(password);
   };
 
   return (
@@ -40,6 +81,12 @@ const SignUp = () => {
               {showForm ? (
                 <form onSubmit={handleSubmit}>
                   <h2 className="text-4xl font-bold mb-6">Sign Up</h2>
+                  {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded" role="alert">
+                    <p>{error}</p>
+                  </div>}
+                  {success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 mb-4 rounded" role="alert">
+                    <p>{success}</p>
+                  </div>}
                   <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
                       Email

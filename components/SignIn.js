@@ -1,26 +1,67 @@
 "use client";
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { EyeIcon, EyeOffIcon } from '@heroicons/react/outline'; 
+import { getUsers } from '@/serverApi/userApi';
 
 const SignIn = () => {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const result = await getUsers();
+        console.log("Fetched users: ", result);
+        setUsers(result);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.push('/ToDo');
+    }
+  }, [isLoggedIn]);
 
   const handleSignUpClick = (e) => {
     e.preventDefault();
     router.push('/SignUp');
   };
 
-  const handleSubmit = (e) => {
+  const handleSignIn = (e) => {
     e.preventDefault();
-    // Log email and password
-    console.log('Email:', email);
-    console.log('Password:', password);
+    const user = users.find(user => user.email === email);
+    
+    if (!user) {
+      setError("User doesn't exist");
+      return;
+    }
+    
+    if (user.password !== password) {
+      setError("Wrong password");
+      return;
+    }
+    
+    setIsLoggedIn(true);
   };
+
+  const clearError = () => {
+    setError('');
+  };
+
+  if (isLoggedIn) {
+    return null;
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -30,7 +71,7 @@ const SignIn = () => {
             <div className="bg-white rounded-lg shadow-lg p-10 flex flex-col justify-center">
               <h2 className="text-4xl font-bold mb-6">Welcome to Your Ultimate To-Do List Manager!</h2>
 
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSignIn}>
                 <div className="mb-4">
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
                     Email
@@ -76,6 +117,14 @@ const SignIn = () => {
                 >
                   Login
                 </button>
+                {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded" role="alert">
+                  <p>{error}</p>
+                  <button onClick={clearError} className="absolute top-0 bottom-0 right-0 px-4 py-3">
+                    <svg className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>}
               </form>
 
               <p className="text-gray-600 flex items-center justify-center">

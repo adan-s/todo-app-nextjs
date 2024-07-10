@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Upcoming from './Upcoming'
-import Today from './Today'
+import Upcoming from "./Upcoming";
+import Today from "./Today";
 import {
   UserCircleIcon,
   BriefcaseIcon,
@@ -15,16 +15,33 @@ import {
 import Work from "./Work";
 import Personal from "./Personal";
 import Other from "./Other";
+import { getCategory } from "@/serverApi/categoryApi";
 
 const ToDo = () => {
   const router = useRouter();
   const [currentView, setCurrentView] = useState("upcoming");
+  const [categories, setCategories] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const handleSignOut = (e) => {
-    e.preventDefault();
-    router.push("/SignIn");
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const result = await getCategory();
+      console.log("the result: ", result);
+      setCategories(result);
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleSignOut = () => {
+    setIsLoggedIn(false);
+    router.push('/SignIn');
   };
 
+
+  if (isLoggedIn) {
+    return null;
+  }
 
 
   return (
@@ -40,35 +57,44 @@ const ToDo = () => {
               Tasks
             </h3>
             <ul>
-            <li
+              <li
                 className={`py-2 ${
-                  currentView === "upcoming" ? "font-bold" : ""
+                  currentView === "upcoming"
+                    ? "font-bold text-orange-500 "
+                    : "text-black "
                 }`}
                 onClick={() => setCurrentView("upcoming")}
               >
-                <a
-                href="#"
-                  className="text-black hover:text-orange-800 flex items-center"
-                >
-                  <InboxInIcon className="h-5 w-5 mr-2 text-gray-500" />
+                <a href="#" className="flex items-center">
+                  <InboxInIcon
+                    className={`h-5 w-5 mr-2  ${
+                      currentView === "upcoming"
+                        ? "text-orange-500"
+                        : "text-gray-500"
+                    }`}
+                  />
                   Upcoming
                 </a>
               </li>
               <li
                 className={`py-2 ${
-                  currentView === "today" ? "font-bold" : ""
+                  currentView === "today"
+                    ? "font-bold text-orange-500 "
+                    : "text-black "
                 }`}
                 onClick={() => setCurrentView("today")}
               >
-                <a
-                href="#"
-                  className="text-black hover:text-orange-800 flex items-center"
-                >
-                  <CheckIcon className="h-5 w-5 mr-2 text-gray-500" />
+                <a href="#" className="flex items-center">
+                  <CheckIcon
+                    className={`h-5 w-5 mr-2  ${
+                      currentView === "today"
+                        ? "text-orange-500"
+                        : "text-gray-500"
+                    }`}
+                  />
                   Today
                 </a>
               </li>
-            
             </ul>
           </div>
           <div>
@@ -76,42 +102,48 @@ const ToDo = () => {
               Categories
             </h3>
             <ul>
-              <li   className={`py-2 ${
-                  currentView === "work" ? "font-bold" : ""
-                }`}
-                onClick={() => setCurrentView("work")}>
-                <a
-                href="#"
-                  className="text-black hover:text-orange-700 flex items-center"
+              {categories.map((category) => (
+                <li
+                  key={category.category_name}
+                  className={`py-2 ${
+                    currentView === category.category_name.toLowerCase()
+                      ? "font-bold text-orange-500 "
+                      : "text-black "
+                  }`}
+                  onClick={() => setCurrentView(category.category_name.toLowerCase())}
                 >
-                  <BriefcaseIcon className="h-5 w-5 mr-2 text-gray-500" />
-                  Work
-                </a>
-              </li>
-              <li className={`py-2 ${
-                  currentView === "personal" ? "font-bold" : ""
-                }`}
-                onClick={() => setCurrentView("personal")}>
-                <a
-                href="#"
-                  className="text-black hover:text-orange-700 flex items-center"
-                >
-                  <UserCircleIcon className="h-5 w-5 mr-2 text-gray-500" />
-                  Personal
-                </a>
-              </li>
-              <li className={`py-2 ${
-                  currentView === "other" ? "font-bold" : ""
-                }`}
-                onClick={() => setCurrentView("other")}>
-                <a
-                href="#"
-                  className="text-black hover:text-orange-700 flex items-center"
-                >
-                  <DotsCircleHorizontalIcon className="h-5 w-5 mr-2 text-gray-500" />
-                  Other
-                </a>
-              </li>
+                  <a href="#" className="flex items-center">
+                    {category.category_name === "Work" && (
+                      <BriefcaseIcon
+                        className={`h-5 w-5 mr-2  ${
+                          currentView === "work"
+                            ? "text-orange-500"
+                            : "text-gray-500"
+                        }`}
+                      />
+                    )}
+                    {category.category_name === "Personal" && (
+                      <UserCircleIcon
+                        className={`h-5 w-5 mr-2  ${
+                          currentView === "personal"
+                            ? "text-orange-500"
+                            : "text-gray-500"
+                        }`}
+                      />
+                    )}
+                    {category.category_name === "Other" && (
+                      <DotsCircleHorizontalIcon
+                        className={`h-5 w-5 mr-2  ${
+                          currentView === "other"
+                            ? "text-orange-500"
+                            : "text-gray-500"
+                        }`}
+                      />
+                    )}
+                    {category.category_name}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -127,39 +159,21 @@ const ToDo = () => {
       </div>
 
       {/* Upcoming Area */}
-        {currentView === 'upcoming' && (
-        <Upcoming/>
-        )}
+      {currentView === "upcoming" && <Upcoming />}
 
-       {/* Today Area */}
-       {currentView === 'today' && (
-        <Today/>
-        )}
+      {/* Today Area */}
+      {currentView === "today" && <Today />}
 
-        {/* Work Area */}
-        {currentView === 'work' && (
-        <Work/>
-        )}
+      {/* Work Area */}
+      {currentView === "work" && <Work />}
 
-       {/* Personal Area */}
-       {currentView === 'personal' && (
-        <Personal/>
-        )}
+      {/* Personal Area */}
+      {currentView === "personal" && <Personal />}
 
-          {/* Other Area */}
-       {currentView === 'other' && (
-        <Other/>
-        )}
-
-
-    
+      {/* Other Area */}
+      {currentView === "other" && <Other />}
     </div>
   );
 };
-  
 
 export default ToDo;
-
-
-
-

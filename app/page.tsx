@@ -1,11 +1,10 @@
 import React from 'react';
 import "./globals.css";
-import SignUp from '@/components/SignUp';
-import ToDo from '@/components/ToDo';
+import SignIn from '@/components/SignIn';
 export default function Home() {
   return (
     <main>
-     <ToDo/>
+     <SignIn/>
     </main>
   );
 }
