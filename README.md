@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# ToDo Website Project
 
-## Getting Started
+This project is a ToDo web application built using NextS for the frontend and NestJS for the backend.
 
-First, run the development server:
+## Table of Contents
+
+- [About the Project](#about-the-project)
+- [Tech Stack](#tech-stack)
+- [Installation](#installation)
+- [ENV File Setup](#env-file-setup)
+- [Running the Project](#running-the-project)
+
+## About the Project
+
+The ToDo website project is designed to help users manage their daily tasks efficiently. It allows users to create, read, update, and delete tasks. The application is built using a robust and scalable architecture with NestJS handling the backend operations and NextJS managing the frontend.
+
+## Tech Stack
+
+- **Backend**: [NestJS](https://nestjs.com/)
+- **Frontend**: [NextJS](https://nextjs.org/)
+- **Package Manager**: npm
+  
+## Installation
+
+To get a local copy up and running, follow these steps:
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/your-username/todo-website.git
+   cd todo-website
+2. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
+## Env file setup
+First, ensure you have the required environment variables set up. Copy the .env.example file to .env and update the environment variables accordingly.
+
+```bash
+cp .env.example .env
+```
+## Running the Project
+
+To run the application, use the following command:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
