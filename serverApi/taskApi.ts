@@ -42,11 +42,7 @@ export async function getTasks() {
 export async function getUserTasks(user_id:number) {
   const tasksData = await fetch(`${serverUrl}/tasks/api/${user_id}`);
 
-  console.log("user id in func:",user_id);
-
   const tasks: Task[] = await tasksData.json();
-
-  console.log("tasks in func:",tasks);
 
   const categoriesData = await fetch(`${serverUrl}/category`);
   const categories: Category[] = await categoriesData.json();
@@ -58,9 +54,6 @@ export async function getUserTasks(user_id:number) {
       category_name: category ? category.category_name : "Unknown",
     };
   });
-
-
-  console.log("tasks with category name in func:",tasksWithCategoryName);
 
   return tasksWithCategoryName;
 }
@@ -94,7 +87,6 @@ export async function addTask(
     user_id: userId,
   };
 
-  console.log("requestBody", requestBody);
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -138,10 +130,7 @@ export async function updateTask(
     category_id: category.id,
     user_id: userId,
   };
-
-  console.log(requestBody);
-  console.log(url);
-
+  
   const response = await fetch(url, {
     method: "PATCH",
     headers: {

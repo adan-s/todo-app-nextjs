@@ -28,7 +28,6 @@ const ToDo = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       const result = await getCategory();
-      console.log("the result: ", result);
       setCategories(result);
     };
 

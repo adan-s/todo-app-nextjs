@@ -18,18 +18,14 @@ const Upcoming = () => {
   });
 
   const currentDate = new Date().toISOString().split('T')[0];
-  console.log(currentDate);
   const tomorrowDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-  console.log(tomorrowDate);
 
   useEffect(() => {
     const fetchUserId = async () => {
       try {
         const id = await findUser(userEmail);
         setUserId(id);
-        console.log("userid:", id);
       } catch (error) {
-        console.error("Error fetching user ID:", error);
         setError("Error fetching user ID. Please try again.");
       }
     };
@@ -46,11 +42,8 @@ const Upcoming = () => {
 
       try {
         const fetchedTasks = await getUserTasks(userId);
-        console.log("userid:", userId);
-        console.log(fetchedTasks);
         setTasks(fetchedTasks || []);
       } catch (error) {
-        console.error("Error fetching tasks:", error);
         setError("Error fetching tasks. Please try again.");
       }
     };
@@ -62,10 +55,6 @@ const Upcoming = () => {
   const tasksToday = tasks.filter(task => task.duedate.split('T')[0] === currentDate);
   const tasksTomorrow = tasks.filter(task => task.duedate.split('T')[0] === tomorrowDate);
   const tasksUpcoming = tasks.filter(task => task.duedate.split('T')[0] > tomorrowDate);
-
-  console.log("Tasks Today:", tasksToday);
-  console.log("Tasks Tomorrow:", tasksTomorrow);
-  console.log("Tasks Upcoming:", tasksUpcoming);
 
 
   const handleFormChange = (e) => {
@@ -91,7 +80,6 @@ const Upcoming = () => {
     }
 
     try {
-      console.log("Form data before submission:", formData);
       if (selectedTask) {
         const updatedTask = await updateTask(
           selectedTask.id,
@@ -105,7 +93,6 @@ const Upcoming = () => {
           userId
         );
         setTasks(tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)));
-        console.log("Updated task:", updatedTask);
       } else {
         const newTask = await addTask(
           formData.title,
@@ -129,7 +116,6 @@ const Upcoming = () => {
       setSelectedTask(null);
       setError("");
     } catch (error) {
-      console.error("Error adding/editing task:", error.message);
       setError("Error adding/editing task. Please try again.");
     }
   };
