@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { addUser } from '@/serverApi/userApi';
+import { addUser, getUser } from '@/serverApi/userApi';
 
 const SignUp = () => {
   const router = useRouter();
@@ -36,8 +36,14 @@ const SignUp = () => {
       setError('Password must be between 8 to 15 characters and include numbers.');
       return;
     }
-  
+
     try {
+      const existingUser = await getUser(email);
+      if (existingUser) {
+        setError('An account with this email already exists.');
+        return;
+      }
+      
       const newUser = await addUser(username, email, password);
       console.log('User added successfully:', newUser);
       setSuccess('User signed up successfully!');

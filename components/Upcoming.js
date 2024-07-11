@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getTasks, addTask, updateTask } from "@/serverApi/taskApi";
+import { addTask, updateTask, getUserTasks } from "@/serverApi/taskApi";
 import { findUser } from "@/serverApi/userApi";
 
 const Upcoming = () => {
@@ -16,6 +16,11 @@ const Upcoming = () => {
     status: "New",
     category: "Work",
   });
+
+  const currentDate = new Date().toISOString().split('T')[0];
+  console.log(currentDate);
+  const tomorrowDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+  console.log(tomorrowDate);
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -34,8 +39,15 @@ const Upcoming = () => {
 
   useEffect(() => {
     const fetchTasks = async () => {
+      if (!userId) {
+        setError("Error! You are not logged in.");
+        return;
+      }
+
       try {
-        const fetchedTasks = await getTasks();
+        const fetchedTasks = await getUserTasks(userId);
+        console.log("userid:", userId);
+        console.log(fetchedTasks);
         setTasks(fetchedTasks || []);
       } catch (error) {
         console.error("Error fetching tasks:", error);
@@ -44,7 +56,17 @@ const Upcoming = () => {
     };
 
     fetchTasks();
-  }, []);
+  }, [userId]);
+
+
+  const tasksToday = tasks.filter(task => task.duedate.split('T')[0] === currentDate);
+  const tasksTomorrow = tasks.filter(task => task.duedate.split('T')[0] === tomorrowDate);
+  const tasksUpcoming = tasks.filter(task => task.duedate.split('T')[0] > tomorrowDate);
+
+  console.log("Tasks Today:", tasksToday);
+  console.log("Tasks Tomorrow:", tasksTomorrow);
+  console.log("Tasks Upcoming:", tasksUpcoming);
+
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -63,7 +85,6 @@ const Upcoming = () => {
       return;
     }
 
-    const currentDate = new Date().toISOString().split('T')[0];
     if (formData.duedate < currentDate) {
       setError("Due date cannot be earlier than the current date.");
       return;
@@ -84,7 +105,6 @@ const Upcoming = () => {
           userId
         );
         setTasks(tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)));
-
         console.log("Updated task:", updatedTask);
       } else {
         const newTask = await addTask(
@@ -107,7 +127,7 @@ const Upcoming = () => {
         category: "Work",
       });
       setSelectedTask(null);
-      setError(""); 
+      setError("");
     } catch (error) {
       console.error("Error adding/editing task:", error.message);
       setError("Error adding/editing task. Please try again.");
@@ -149,19 +169,16 @@ const Upcoming = () => {
       </div>
 
       {/* Display Tasks */}
-      {tasks.length === 0 ? (
-        <p>No tasks</p>
-      ) : (
-        <div className="bg-white rounded-lg shadow-md p-10 mb-6">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Today</h2>
+      <div className="bg-white rounded-lg shadow-md p-10 mb-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Today</h2>
+        {tasksToday.length === 0 ? (
+          <p>No tasks for today</p>
+        ) : (
           <ul className="list-disc">
-            {tasks.map((task) => (
-              <li
-                key={task.id}
-                className="flex items-center justify-between mb-2"
-              >
+            {tasksToday.map((task) => (
+              <li key={task.id} className="flex items-center justify-between mb-2">
                 <span className="flex items-center">
-                  <input type="checkbox" className="mr-2" />
+                 
                   <span>{task.title}</span>
                 </span>
                 <svg
@@ -182,8 +199,72 @@ const Upcoming = () => {
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        )}
+      </div>
+
+      <div className="bg-white rounded-lg shadow-md p-10 mb-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Tomorrow</h2>
+        {tasksTomorrow.length === 0 ? (
+          <p>No tasks for tomorrow</p>
+        ) : (
+          <ul className="list-disc">
+            {tasksTomorrow.map((task) => (
+              <li key={task.id} className="flex items-center justify-between mb-2">
+                <span className="flex items-center">
+                  <span>{task.title}</span>
+                </span>
+                <svg
+                  onClick={() => handleEditTask(task)}
+                  className="w-6 h-6 cursor-pointer"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
+                </svg>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="bg-white rounded-lg shadow-md p-10 mb-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Upcoming</h2>
+        {tasksUpcoming.length === 0 ? (
+          <p>No upcoming tasks</p>
+        ) : (
+          <ul className="list-disc">
+            {tasksUpcoming.map((task) => (
+              <li key={task.id} className="flex items-center justify-between mb-2">
+                <span className="flex items-center">
+                  <span>{task.title}</span>
+                </span>
+                <svg
+                  onClick={() => handleEditTask(task)}
+                  className="w-6 h-6 cursor-pointer"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
+                </svg>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {/* Popup Form */}
       {isFormOpen && (

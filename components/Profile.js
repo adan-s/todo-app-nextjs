@@ -78,16 +78,12 @@ const Profile = () => {
     <div className="container mx-auto p-10">
       <div className="flex items-center justify-center mb-2">
         <h1 className="text-3xl font-bold text-gray-800 mb-6">User Profile</h1>
-        <button
-          onClick={handleEditClick}
-          className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
-          Edit
-        </button>
       </div>
 
       <div className="bg-white rounded-lg shadow-lg p-10 mb-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Profile Details</h2>
+        <h2 className="text-xl font-bold text-gray-800 mb-4">
+          Profile Details
+        </h2>
         {error && (
           <p className="text-red-500 mb-4 p-2 border border-red-500 rounded">
             {error}
@@ -149,6 +145,16 @@ const Profile = () => {
             />
           </div>
         )}
+        {!editMode ? (
+          <>
+            <button
+              onClick={handleEditClick}
+              className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            >
+              Edit
+            </button>
+          </>
+        ) : null}
         <div className="flex items-center justify-between">
           {editMode ? (
             <>

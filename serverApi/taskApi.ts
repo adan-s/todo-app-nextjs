@@ -38,6 +38,34 @@ export async function getTasks() {
   return tasksWithCategoryName;
 }
 
+
+export async function getUserTasks(user_id:number) {
+  const tasksData = await fetch(`${serverUrl}/tasks/api/${user_id}`);
+
+  console.log("user id in func:",user_id);
+
+  const tasks: Task[] = await tasksData.json();
+
+  console.log("tasks in func:",tasks);
+
+  const categoriesData = await fetch(`${serverUrl}/category`);
+  const categories: Category[] = await categoriesData.json();
+
+  const tasksWithCategoryName = tasks.map((task) => {
+    const category = categories.find((cat) => cat.id === task.category_id);
+    return {
+      ...task,
+      category_name: category ? category.category_name : "Unknown",
+    };
+  });
+
+
+  console.log("tasks with category name in func:",tasksWithCategoryName);
+
+  return tasksWithCategoryName;
+}
+
+
 export async function addTask(
   title: string,
   description: string,

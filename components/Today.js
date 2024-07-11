@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getTasks, addTask, updateTask } from "@/serverApi/taskApi";
+import { getUserTasks, addTask, updateTask } from "@/serverApi/taskApi";
 import { findUser } from "@/serverApi/userApi";
 
 const Today = () => {
@@ -16,6 +16,8 @@ const Today = () => {
     status: "New",
     category: "Work",
   });
+
+  const currentDate = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -34,8 +36,15 @@ const Today = () => {
 
   useEffect(() => {
     const fetchTasks = async () => {
+      if (!userId) {
+        setError("Error! You are not logged in.");
+        return;
+      }
+
       try {
-        const fetchedTasks = await getTasks();
+        const fetchedTasks = await getUserTasks(userId);
+        console.log("userid:", userId);
+        console.log(fetchedTasks);
         setTasks(fetchedTasks || []);
       } catch (error) {
         console.error("Error fetching tasks:", error);
@@ -44,7 +53,7 @@ const Today = () => {
     };
 
     fetchTasks();
-  }, []);
+  }, [userId]);
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -63,7 +72,6 @@ const Today = () => {
       return;
     }
 
-    const currentDate = new Date().toISOString().split('T')[0];
     if (formData.duedate < currentDate) {
       setError("Due date cannot be earlier than the current date.");
       return;
@@ -119,12 +127,15 @@ const Today = () => {
     setFormData({
       title: task.title,
       desc: task.description,
-      duedate: task.duedate,
+      duedate: task.duedate.split('T')[0],
       status: task.status,
       category: task.category_name,
     });
     setIsFormOpen(true);
   };
+
+  // Filter tasks to only include those due today
+  const tasksToday = tasks.filter(task => task.duedate.split('T')[0] === currentDate);
 
   return (
     <div className="container mx-auto p-10">
@@ -149,19 +160,18 @@ const Today = () => {
       </div>
 
       {/* Display Tasks */}
-      {tasks.length === 0 ? (
-        <p>No tasks</p>
+      {tasksToday.length === 0 ? (
+        <p>No tasks for today</p>
       ) : (
         <div className="bg-white rounded-lg shadow-md p-10 mb-6">
           <h2 className="text-xl font-bold text-gray-800 mb-4">Tasks</h2>
           <ul className="list-disc">
-            {tasks.map((task) => (
+            {tasksToday.map((task) => (
               <li
                 key={task.id}
                 className="flex items-center justify-between mb-2"
               >
                 <span className="flex items-center">
-                  <input type="checkbox" className="mr-2" />
                   <span>{task.title}</span>
                 </span>
                 <svg
@@ -255,7 +265,7 @@ const Today = () => {
                 {error && formData.duedate === "" && (
                   <p className="text-red-500 text-xs italic">Due date is required.</p>
                 )}
-                {error && formData.duedate < new Date().toISOString().split('T')[0] && (
+                {error && formData.duedate < currentDate && (
                   <p className="text-red-500 text-xs italic">Due date cannot be earlier than the current date.</p>
                 )}
               </div>

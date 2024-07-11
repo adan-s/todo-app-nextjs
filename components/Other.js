@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getTasks, addTask, updateTask } from "@/serverApi/taskApi";
+import { getUserTasks, addTask, updateTask } from "@/serverApi/taskApi";
 import { findUser } from "@/serverApi/userApi";
 
 const Other = () => {
@@ -34,8 +34,14 @@ const Other = () => {
 
   useEffect(() => {
     const fetchTasks = async () => {
+      if (!userId) 
+      {  setError("Error! You are not logged in.");
+      return;}
+
       try {
-        const fetchedTasks = await getTasks();
+        const fetchedTasks = await getUserTasks(userId);
+        console.log("userid:",userId);
+        console.log(fetchedTasks);
         setTasks(fetchedTasks || []);
       } catch (error) {
         console.error("Error fetching tasks:", error);
@@ -44,7 +50,7 @@ const Other = () => {
     };
 
     fetchTasks();
-  }, []);
+  },[userId]);
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -163,7 +169,6 @@ const Other = () => {
                 className="flex items-center justify-between mb-2"
               >
                 <span className="flex items-center">
-                  <input type="checkbox" className="mr-2" />
                   <span>{task.title}</span>
                 </span>
                 <svg
