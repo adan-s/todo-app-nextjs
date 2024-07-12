@@ -146,3 +146,19 @@ export async function updateTask(
 
   return response.json();
 }
+
+export async function deleteTask(taskId: number): Promise<void> {
+  const url = `${serverUrl}/tasks/${taskId}`;
+
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errorMessage = `An error occurred: ${response.status}`;
+    throw new Error(errorMessage);
+  }
+}

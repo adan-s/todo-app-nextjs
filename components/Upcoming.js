@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { addTask, updateTask, getUserTasks } from "@/serverApi/taskApi";
+import { addTask, updateTask, getUserTasks, deleteTask } from "@/serverApi/taskApi";
 import { findUser } from "@/serverApi/userApi";
 
 const Upcoming = () => {
@@ -16,6 +16,8 @@ const Upcoming = () => {
     status: "New",
     category: "Work",
   });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
 
   const currentDate = new Date().toISOString().split('T')[0];
   const tomorrowDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
@@ -35,10 +37,6 @@ const Upcoming = () => {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      if (!userId) {
-        setError("Error! You are not logged in.");
-        return;
-      }
 
       try {
         const fetchedTasks = await getUserTasks(userId);
@@ -51,11 +49,10 @@ const Upcoming = () => {
     fetchTasks();
   }, [userId]);
 
-
   const tasksToday = tasks.filter(task => task.duedate.split('T')[0] === currentDate);
   const tasksTomorrow = tasks.filter(task => task.duedate.split('T')[0] === tomorrowDate);
   const tasksUpcoming = tasks.filter(task => task.duedate.split('T')[0] > tomorrowDate);
-
+  const tasksPast = tasks.filter(task => task.duedate.split('T')[0] < currentDate);
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -132,6 +129,19 @@ const Upcoming = () => {
     setIsFormOpen(true);
   };
 
+  const handleDeleteTask = async () => {
+    try {
+      if (taskToDelete) {
+        await deleteTask(taskToDelete.id);
+        setTasks(tasks.filter(task => task.id !== taskToDelete.id));
+        setTaskToDelete(null);
+        setShowDeleteModal(false);
+      }
+    } catch (error) {
+      setError("Error deleting task. Please try again.");
+    }
+  };
+
   return (
     <div className="container mx-auto p-10">
       <div className="flex items-center justify-between mb-2">
@@ -164,24 +174,25 @@ const Upcoming = () => {
             {tasksToday.map((task) => (
               <li key={task.id} className="flex items-center justify-between mb-2">
                 <span className="flex items-center">
-                 
                   <span>{task.title}</span>
                 </span>
-                <svg
-                  onClick={() => handleEditTask(task)}
-                  className="w-6 h-6 cursor-pointer"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  />
-                </svg>
+              <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => handleEditTask(task)}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    Details
+                  </button>
+                  <button
+                    onClick={() => {
+                      setTaskToDelete(task);
+                      setShowDeleteModal(true);
+                    }}
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -199,21 +210,23 @@ const Upcoming = () => {
                 <span className="flex items-center">
                   <span>{task.title}</span>
                 </span>
-                <svg
-                  onClick={() => handleEditTask(task)}
-                  className="w-6 h-6 cursor-pointer"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  />
-                </svg>
+              <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => handleEditTask(task)}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    Details
+                  </button>
+                  <button
+                    onClick={() => {
+                      setTaskToDelete(task);
+                      setShowDeleteModal(true);
+                    }}
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -231,133 +244,155 @@ const Upcoming = () => {
                 <span className="flex items-center">
                   <span>{task.title}</span>
                 </span>
-                <svg
-                  onClick={() => handleEditTask(task)}
-                  className="w-6 h-6 cursor-pointer"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  />
-                </svg>
+              <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => handleEditTask(task)}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    Details
+                  </button>
+                  <button
+                    onClick={() => {
+                      setTaskToDelete(task);
+                      setShowDeleteModal(true);
+                    }}
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      {/* Popup Form */}
+      <div className="bg-white rounded-lg shadow-md p-10 mb-6">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Past</h2>
+        {tasksPast.length === 0 ? (
+          <p>No past tasks</p>
+        ) : (
+          <ul className="list-disc">
+            {tasksPast.map((task) => (
+              <li key={task.id} className="flex items-center justify-between mb-2">
+                <span className="flex items-center">
+                  <span>{task.title}</span>
+                </span>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => handleEditTask(task)}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    Details
+                  </button>
+                  <button
+                    onClick={() => {
+                      setTaskToDelete(task);
+                      setShowDeleteModal(true);
+                    }}
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center">
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50"></div>
+          <div className="bg-white p-6 rounded-lg shadow-md z-10">
+            <p className="text-lg font-semibold mb-4">Are you sure you want to delete the task?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setTaskToDelete(null);
+                }}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteTask}
+                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {isFormOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 shadow-lg">
-            <h2 className="text-2xl font-bold mb-4">
-              {selectedTask ? "Edit Task" : "Add New Task"}
-            </h2>
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
             <form onSubmit={handleFormSubmit}>
+              <h2 className="text-lg font-medium mb-4">
+                {selectedTask ? "Edit Task" : "Add Task"}
+              </h2>
               <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="title"
-                >
+                <label className="block text-gray-700 text-sm font-bold mb-2">
                   Title
                 </label>
                 <input
                   type="text"
-                  id="title"
                   name="title"
                   value={formData.title}
                   onChange={handleFormChange}
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                    error && formData.title.trim() === "" ? "border-red-500" : ""
-                  }`}
+                  className="w-full p-2 border border-gray-300 rounded"
                 />
-                {error && formData.title.trim() === "" && (
-                  <p className="text-red-500 text-xs italic">Title is required.</p>
-                )}
               </div>
               <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="desc"
-                >
+                <label className="block text-gray-700 text-sm font-bold mb-2">
                   Description
                 </label>
-                <input
-                  type="text"
-                  id="desc"
+                <textarea
                   name="desc"
                   value={formData.desc}
                   onChange={handleFormChange}
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                    error && formData.desc.trim() === "" ? "border-red-500" : ""
-                  }`}
-                />
-                {error && formData.desc.trim() === "" && (
-                  <p className="text-red-500 text-xs italic">Description is required.</p>
-                )}
+                  className="w-full p-2 border border-gray-300 rounded"
+                ></textarea>
               </div>
               <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="duedate"
-                >
+                <label className="block text-gray-700 text-sm font-bold mb-2">
                   Due Date
                 </label>
                 <input
                   type="date"
-                  id="duedate"
                   name="duedate"
                   value={formData.duedate}
                   onChange={handleFormChange}
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                    error && formData.duedate === "" ? "border-red-500" : ""
-                  }`}
+                  className="w-full p-2 border border-gray-300 rounded"
                 />
-                {error && formData.duedate === "" && (
-                  <p className="text-red-500 text-xs italic">Due date is required.</p>
-                )}
-                {error && formData.duedate < new Date().toISOString().split('T')[0] && (
-                  <p className="text-red-500 text-xs italic">Due date cannot be earlier than the current date.</p>
-                )}
               </div>
               <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="status"
-                >
+                <label className="block text-gray-700 text-sm font-bold mb-2">
                   Status
                 </label>
                 <select
-                  id="status"
                   name="status"
                   value={formData.status}
                   onChange={handleFormChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="w-full p-2 border border-gray-300 rounded"
                 >
                   <option value="New">New</option>
-                  <option value="Ongoing">Ongoing</option>
-                  <option value="Finished">Finished</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
                 </select>
               </div>
               <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="category"
-                >
+                <label className="block text-gray-700 text-sm font-bold mb-2">
                   Category
                 </label>
                 <select
-                  id="category"
                   name="category"
                   value={formData.category}
                   onChange={handleFormChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="w-full p-2 border border-gray-300 rounded"
                 >
                   <option value="Work">Work</option>
                   <option value="Personal">Personal</option>
@@ -369,11 +404,12 @@ const Upcoming = () => {
                   type="submit"
                   className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 >
-                  {selectedTask ? "Save Changes" : "Add Task"}
+                  {selectedTask ? "Update Task" : "Add Task"}
                 </button>
                 <button
+                  type="button"
                   onClick={() => setIsFormOpen(false)}
-                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 >
                   Cancel
                 </button>

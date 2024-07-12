@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getUserTasks, addTask, updateTask } from "@/serverApi/taskApi";
+import { getUserTasks, addTask, updateTask,deleteTask } from "@/serverApi/taskApi";
 import { findUser } from "@/serverApi/userApi";
 
 const Personal = () => {
@@ -16,6 +16,8 @@ const Personal = () => {
     status: "New",
     category: "Work",
   });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -135,6 +137,20 @@ const Personal = () => {
     setIsFormOpen(true);
   };
 
+
+  const handleDeleteTask = async () => {
+    try {
+      if (taskToDelete) {
+        await deleteTask(taskToDelete.id);
+        setTasks(tasks.filter(task => task.id !== taskToDelete.id));
+        setTaskToDelete(null);
+        setShowDeleteModal(false);
+      }
+    } catch (error) {
+      setError("Error deleting task. Please try again.");
+    }
+  };
+
   const personalTasks = tasks.filter(task => task.category_name === "Personal");
 
   return (
@@ -174,27 +190,55 @@ const Personal = () => {
                 <span className="flex items-center">
                   <span>{task.title}</span>
                 </span>
-                <svg
-                  onClick={() => handleEditTask(task)}
-                  className="w-6 h-6 cursor-pointer"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 8l4 4m0 0l-4 4m4-4H3"
-                  />
-                </svg>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => handleEditTask(task)}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    Details
+                  </button>
+                  <button
+                    onClick={() => {
+                      setTaskToDelete(task);
+                      setShowDeleteModal(true);
+                    }}
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
         </div>
       )}
 
+
+{showDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center">
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50"></div>
+          <div className="bg-white p-6 rounded-lg shadow-md z-10">
+            <p className="text-lg font-semibold mb-4">Are you sure you want to delete the task?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setTaskToDelete(null);
+                }}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteTask}
+                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Popup Form */}
       {isFormOpen && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
