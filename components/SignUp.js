@@ -42,7 +42,7 @@ const SignUp = () => {
 
     try {
       const existingUser = await getUser(email);
-      
+
       if (existingUser.email!=false) {
         setError('An account with this email already exists.');
         return;
@@ -55,9 +55,8 @@ const SignUp = () => {
       console.log('User added successfully:', newUser);
       setSuccess('User signed up successfully!');
       setError('');
-      setTimeout(() => {
-        router.push('/ToDo');
-      }, 2000);
+      router.push('/ToDo');
+  
     } catch (error) {
       console.error('Error adding user:', error);
       setError('Error signing up. Please try again.');
@@ -106,7 +105,7 @@ const SignUp = () => {
                       Email
                     </label>
                     <input
-                      type="email"
+                      type="text"
                       id="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}

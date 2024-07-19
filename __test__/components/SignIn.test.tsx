@@ -1,17 +1,25 @@
-import SignIn from '@/components/SignIn';
-import '@testing-library/jest-dom';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
-import { useRouter } from 'next/navigation';
-import React from 'react';
+import SignIn from "@/components/SignIn";
+import "@testing-library/jest-dom";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
+import { useRouter } from "next/navigation";
+import React from "react";
 
-jest.mock('next/navigation', () => ({
+jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
 }));
 
-jest.mock('@/serverApi/userApi', () => ({
-  getUsers: jest.fn().mockResolvedValue([
-    { email: 'example@gmail.com', password: 'password123' },
-  ]),
+jest.mock("@/serverApi/userApi", () => ({
+  getUsers: jest
+    .fn()
+    .mockResolvedValue([
+      { email: "example@gmail.com", password: "password123" },
+    ]),
 }));
 
 const localStorageMock = (function () {
@@ -33,11 +41,11 @@ const localStorageMock = (function () {
   };
 })();
 
-Object.defineProperty(window, 'localStorage', {
+Object.defineProperty(window, "localStorage", {
   value: localStorageMock,
 });
 
-describe('SignIn', () => {
+describe("SignIn", () => {
   const mockPush = jest.fn();
 
   beforeEach(() => {
@@ -46,74 +54,79 @@ describe('SignIn', () => {
     }));
   });
 
-
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders a heading', () => {
+  it("renders a heading", () => {
     render(<SignIn />);
-    const heading = screen.getByText('Email');
+    const heading = screen.getByText("Email");
     expect(heading).toBeInTheDocument();
   });
 
-  it('shows an error if the user does not exist', async () => {
-
+  it("shows an error if the user does not exist", async () => {
     await act(async () => await render(<SignIn />));
-    const emailInput = screen.getByLabelText('Email') as HTMLInputElement;
-    const passwordInput = screen.getByLabelText('Password') as HTMLInputElement;
+    const emailInput = screen.getByLabelText("Email") as HTMLInputElement;
+    const passwordInput = screen.getByLabelText("Password") as HTMLInputElement;
 
-    fireEvent.change(emailInput, { target: { value: 'wrong@example.com' } });
-    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+    fireEvent.change(emailInput, { target: { value: "wrong@example.com" } });
+    fireEvent.change(passwordInput, { target: { value: "password123" } });
 
     await act(async () => {
-      fireEvent.click(screen.getByText('Login'));
+      fireEvent.click(screen.getByText("Login"));
     });
 
     const error = await screen.findByText(/User doesn't exist/i);
 
-    await waitFor(() => { 
+    await waitFor(() => {
       expect(error).toBeInTheDocument();
     });
   });
 
-  it('shows an error if the password is incorrect', async () => {
-
+  it("shows an error if the password is incorrect", async () => {
     await act(async () => await render(<SignIn />));
 
-    const emailInput = screen.getByLabelText('Email') as HTMLInputElement;
-    const passwordInput = screen.getByLabelText('Password') as HTMLInputElement;
+    const emailInput = screen.getByLabelText("Email") as HTMLInputElement;
+    const passwordInput = screen.getByLabelText("Password") as HTMLInputElement;
 
-    fireEvent.change(emailInput, { target: { value: 'example@gmail.com' } });
-    fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } });
-    fireEvent.click(screen.getByText('Login'));
-  
-
+    fireEvent.change(emailInput, { target: { value: "example@gmail.com" } });
+    fireEvent.change(passwordInput, { target: { value: "wrongpassword" } });
+    fireEvent.click(screen.getByText("Login"));
 
     const error = await screen.findByText(/Wrong password/i);
 
-    await waitFor(() => { 
+    await waitFor(() => {
       expect(error).toBeInTheDocument();
     });
   });
 
-
-  it('logs in the user if the credentials are correct', async () => {
-
+  it("logs in the user if the credentials are correct", async () => {
     await act(async () => await render(<SignIn />));
 
-    const emailInput = screen.getByLabelText('Email') as HTMLInputElement;
-    const passwordInput = screen.getByLabelText('Password') as HTMLInputElement;
+    const emailInput = screen.getByLabelText("Email") as HTMLInputElement;
+    const passwordInput = screen.getByLabelText("Password") as HTMLInputElement;
 
-    fireEvent.change(emailInput, { target: { value: 'example@gmail.com' } });
-    fireEvent.change(passwordInput, { target: { value: 'password123' } });
-    fireEvent.click(screen.getByText('Login'));
-
+    fireEvent.change(emailInput, { target: { value: "example@gmail.com" } });
+    fireEvent.change(passwordInput, { target: { value: "password123" } });
+    fireEvent.click(screen.getByText("Login"));
 
     await waitFor(() => {
-          expect(localStorage.getItem('loggedInUser')).toBe(JSON.stringify('example@gmail.com'));
-          expect(mockPush).toHaveBeenCalledWith('/ToDo');
-        });
+      expect(localStorage.getItem("loggedInUser")).toBe(
+        JSON.stringify("example@gmail.com")
+      );
+      expect(mockPush).toHaveBeenCalledWith("/ToDo");
+    });
+  });
+
+
+  it('renders Sign Up', async () => {
+    render(<SignIn />);
+
+    fireEvent.click(screen.getByRole('link', { name: /SignUp/i }));
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/SignUp');
+    });
   });
 
 });
