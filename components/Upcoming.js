@@ -335,10 +335,11 @@ const Upcoming = () => {
                 {selectedTask ? "Edit Task" : "Add Task"}
               </h2>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
+                <label htmlFor="title" className="block text-gray-700 text-sm font-bold mb-2">
                   Title
                 </label>
                 <input
+                id="title"
                   type="text"
                   name="title"
                   value={formData.title}
@@ -347,10 +348,11 @@ const Upcoming = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
+                <label htmlFor="desc" className="block text-gray-700 text-sm font-bold mb-2">
                   Description
                 </label>
                 <textarea
+                id="desc"
                   name="desc"
                   value={formData.desc}
                   onChange={handleFormChange}
@@ -358,10 +360,11 @@ const Upcoming = () => {
                 ></textarea>
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
+                <label htmlFor="duedate" className="block text-gray-700 text-sm font-bold mb-2">
                   Due Date
                 </label>
                 <input
+                id="duedate"
                   type="date"
                   name="duedate"
                   value={formData.duedate}
@@ -370,10 +373,11 @@ const Upcoming = () => {
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
+                <label htmlFor="status" className="block text-gray-700 text-sm font-bold mb-2">
                   Status
                 </label>
                 <select
+                id="status"
                   name="status"
                   value={formData.status}
                   onChange={handleFormChange}
@@ -385,10 +389,11 @@ const Upcoming = () => {
                 </select>
               </div>
               <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
+                <label htmlFor="category" className="block text-gray-700 text-sm font-bold mb-2">
                   Category
                 </label>
                 <select
+                id="category"
                   name="category"
                   value={formData.category}
                   onChange={handleFormChange}
