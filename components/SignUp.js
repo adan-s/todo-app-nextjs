@@ -28,29 +28,36 @@ const SignUp = () => {
       setError('Please enter a valid email address.');
       return;
     }
+
     if (!validateUsername(username)) {
       setError('Username should not contain numbers.');
       return;
     }
+
     if (!validatePassword(password)) {
       setError('Password must be between 8 to 15 characters and include numbers.');
       return;
     }
 
+
     try {
       const existingUser = await getUser(email);
-      if (existingUser) {
+      
+      if (existingUser.email!=false) {
         setError('An account with this email already exists.');
         return;
       }
       
+      console.log("new user details:",{username,email,password});
+
       const newUser = await addUser(username, email, password);
+
       console.log('User added successfully:', newUser);
       setSuccess('User signed up successfully!');
       setError('');
       setTimeout(() => {
         router.push('/ToDo');
-      }, 2000); // Redirect after 2 seconds
+      }, 2000);
     } catch (error) {
       console.error('Error adding user:', error);
       setError('Error signing up. Please try again.');
@@ -90,8 +97,9 @@ const SignUp = () => {
                   {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded" role="alert">
                     <p>{error}</p>
                   </div>}
-                  {success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 mb-4 rounded" role="alert">
-                    <p>{success}</p>
+                  {success && 
+                  <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 mb-4 rounded" role="alert" >
+                    <p className='successMsg' role='successMsg'>{success}</p>
                   </div>}
                   <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">

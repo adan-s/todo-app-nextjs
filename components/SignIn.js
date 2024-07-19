@@ -44,7 +44,7 @@ const SignIn = () => {
   const handleSignIn = (e) => {
     e.preventDefault();
     const user = users.find(user => user.email === email);
-    
+  
     if (!user) {
       setError("User doesn't exist");
       return;
@@ -121,7 +121,7 @@ const SignIn = () => {
                   Login
                 </button>
                 {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded" role="alert">
-                  <p>{error}</p>
+                  <p className='errorMsg'>{error}</p>
                   <button onClick={clearError} className="absolute top-0 bottom-0 right-0 px-4 py-3">
                     <svg className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
