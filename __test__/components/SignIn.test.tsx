@@ -65,7 +65,7 @@ describe("SignIn", () => {
   });
 
   it("shows an error if the user does not exist", async () => {
-    await act(async () => await render(<SignIn />));
+    await act(async () =>  render(<SignIn />));
     const emailInput = screen.getByLabelText("Email") as HTMLInputElement;
     const passwordInput = screen.getByLabelText("Password") as HTMLInputElement;
 
@@ -84,7 +84,7 @@ describe("SignIn", () => {
   });
 
   it("shows an error if the password is incorrect", async () => {
-    await act(async () => await render(<SignIn />));
+    await act(async () =>  render(<SignIn />));
 
     const emailInput = screen.getByLabelText("Email") as HTMLInputElement;
     const passwordInput = screen.getByLabelText("Password") as HTMLInputElement;

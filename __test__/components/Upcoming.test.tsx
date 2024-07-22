@@ -1,153 +1,230 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
-import Upcoming from '@/components/Upcoming';
-import { addTask, updateTask, getUserTasks, deleteTask } from '@/serverApi/taskApi';
-import { findUser } from '@/serverApi/userApi';
+import React from "react";
+import { render, screen, waitFor, act, fireEvent } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import Upcoming from "@/components/Upcoming";
 
-jest.mock('@/serverApi/taskApi', () => ({
-  addTask: jest.fn(),
-  updateTask: jest.fn(),
-  getUserTasks: jest.fn(),
-  deleteTask: jest.fn(),
+const getUserTasksMock = jest.fn();
+const addTaskMock = jest.fn();
+const findUserMock = jest.fn();
+const updateTaskMock=jest.fn();
+const deleteTaskMock=jest.fn();
+
+jest.mock("@/serverApi/taskApi", () => ({
+  addTask: (title: string, description: string, duedate: string, status: string, category_name: string, userId: number) => 
+    addTaskMock(title, description, duedate, status, category_name, userId),
+  updateTask: (id: number, category_name: string, updatedTask: { title: string; description: string; duedate: string; status: string }, userId: number) => 
+    updateTaskMock(id, category_name, updatedTask, userId),
+  getUserTasks: (id: number) => getUserTasksMock(id),
+  deleteTask: (id:number)=>deleteTaskMock(id),
 }));
 
-jest.mock('@/serverApi/userApi', () => ({
-  findUser: jest.fn(),
+jest.mock("@/serverApi/userApi", () => ({
+  findUser: (email: string) => findUserMock(email),
 }));
 
-describe('Upcoming Component', () => {
+describe("Upcoming Component", () => {
+  const mockUser = { id: 1, email: "test@example.com" };
   const mockTasks = [
-    { id: 1, title: 'Task 1', description: 'Description 1', duedate: new Date().toISOString(), status: 'New', category_name: 'Work' },
-    { id: 2, title: 'Task 2', description: 'Description 2', duedate: new Date(Date.now() + 86400000).toISOString(), status: 'In Progress', category_name: 'Personal' },
-    { id: 3, title: 'Task 3', description: 'Description 3', duedate: new Date(Date.now() + 172800000).toISOString(), status: 'Completed', category_name: 'Other' },
+    {
+      id: 1,
+      title: "Task 1",
+      description: "Description 1",
+      duedate: new Date().toISOString(),
+      status: "New",
+      category_name: "Work",
+      user_id: mockUser.id,
+    },
+    {
+      id: 2,
+      title: "Task 2",
+      description: "Description 2",
+      duedate: new Date().toISOString(),
+      status: "In Progress",
+      category_name: "Personal",
+      user_id: mockUser.id,
+    },
+    {
+      id: 3,
+      title: "Task 3",
+      description: "Description 3",
+      duedate: new Date().toISOString(),
+      status: "Completed",
+      category_name: "Other",
+      user_id: mockUser.id,
+    },
   ];
 
-  const mockUser = { id: 1, email: 'test@example.com' };
-
   beforeEach(() => {
-    localStorage.setItem('loggedInUser', JSON.stringify(mockUser.email));
-    (findUser as jest.Mock).mockResolvedValue(mockUser.id);
-    (getUserTasks as jest.Mock).mockResolvedValue(mockTasks);
+    localStorage.setItem("loggedInUser", JSON.stringify(mockUser.email));
+
+    findUserMock.mockImplementation((email) => {
+      if (email === mockUser.email) {
+        return Promise.resolve(mockUser.id);
+      }
+      return Promise.reject(new Error("User not found"));
+    });
+
+    getUserTasksMock.mockImplementation((id) => {
+      if (id === mockUser.id) {
+        return Promise.resolve(mockTasks);
+      }
+    });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders component and fetches tasks', async () => {
-    render(<Upcoming />);
+  it("renders component and fetches tasks", async () => {
+    await act(async () => render(<Upcoming />));
 
-    expect(screen.getByRole('heading', { level: 1, name: /Upcoming/i })).toBeInTheDocument();
-
-    expect(screen.getByText('+ Add New Task')).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 1, name: /Upcoming/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText("+ Add New Task")).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(getUserTasks).toHaveBeenCalledWith(mockUser.id);
+      expect(findUserMock).toHaveBeenCalledWith(mockUser.email);
+      expect(getUserTasksMock).toHaveBeenCalledWith(mockUser.id);
     });
 
-    expect(screen.getByText('Task 1')).toBeInTheDocument();
-    expect(screen.getByText('Task 2')).toBeInTheDocument();
-    expect(screen.getByText('Task 3')).toBeInTheDocument();
+    expect(screen.getByText("Task 1")).toBeInTheDocument();
+    expect(screen.getByText("Task 2")).toBeInTheDocument();
+    expect(screen.getByText("Task 3")).toBeInTheDocument();
   });
 
-  it('opens form for adding new task', async () => {
-    render(<Upcoming />);
-
-    fireEvent.click(screen.getByText('+ Add New Task'));
-
-    await waitFor(() => {
-
-        expect(screen.getByRole('button', {  name: /Add Task/i })).toBeInTheDocument();
+  it("opens form for adding new task", async () => {
+    addTaskMock.mockResolvedValue({
+      id: 4,
+      title: "New Task",
+      description: "New Description",
+      duedate: new Date().toISOString(),
+      status: "New",
+      category_name: "Work",
+      user_id: mockUser.id,
     });
+  
+    render(<Upcoming />);
+  
+    fireEvent.click(screen.getByText("+ Add New Task"));
+  
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: /Add Task/i })).toBeInTheDocument();
+    });
+  
+    fireEvent.change(screen.getByLabelText("Title"), {
+      target: { value: "New Task" },
+    });
+    fireEvent.change(screen.getByLabelText("Description"), {
+      target: { value: "New Description" },
+    });
+    fireEvent.change(screen.getByLabelText("Due Date"), {
+      target: { value: new Date().toISOString().split("T")[0] }, 
+    });
+    fireEvent.change(screen.getByLabelText("Status"), {
+      target: { value: "New" },
+    });
+    fireEvent.change(screen.getByLabelText("Category"), {
+      target: { value: "Work" },
+    });
+  
+    fireEvent.click(screen.getByRole("button", { name: /Add Task/i }));
+  
+    await waitFor(() => {
+      expect(addTaskMock).toHaveBeenCalledWith(
+        "New Task",
+        "New Description",
+        expect.any(String),
+        "New",
+        "Work",
+        mockUser.id
+      );
+    });
+  });
 
-    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'New Task' } });
-    fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'New Description' } });
+  it("handles task update", async () => {
+    render(<Upcoming />);
+  
+    await waitFor(() => {
+      expect(screen.getByText('Task 1')).toBeInTheDocument();
+    });
+  
+    const detailButtons = screen.getAllByRole('button', { name: /Details/i });
+    fireEvent.click(detailButtons[0]);
+  
+    await waitFor(() => {
+      expect(screen.getByText('Edit Task')).toBeInTheDocument();
+    });
+  
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Updated Task 1' } });
+    fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Updated Description 1' } });
     fireEvent.change(screen.getByLabelText('Due Date'), { target: { value: new Date().toISOString().split('T')[0] } });
-    fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'New' } });
-    fireEvent.change(screen.getByLabelText('Category'), { target: { value: 'Work' } });
+    fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'In Progress' } });
+    fireEvent.change(screen.getByLabelText('Category'), { target: { value: 'Personal' } });
+  
+    fireEvent.click(screen.getByRole('button', { name: /Update Task/i }));
+  
+    await waitFor(() => {
+      expect(updateTaskMock).toHaveBeenCalledWith(
+        1,
+        "Personal",
+        {
+          title: 'Updated Task 1',
+          description: 'Updated Description 1',
+          duedate: new Date().toISOString().split('T')[0],
+          status: 'In Progress',
+        },
+        mockUser.id
+      );
+    });
+  
+  });
 
-    fireEvent.click(screen.getByRole('button', {  name: /Add Task/i }));
+
+  it('handles task deletion', async () => {
+    render(<Upcoming />);
 
     await waitFor(() => {
-      expect(addTask).toHaveBeenCalledWith('New Task', 'New Description', new Date().toISOString().split('T')[0], 'New', 'Work', mockUser.id);
+      expect(screen.getByText('Task 1')).toBeInTheDocument();
     });
 
+    const deleteButtons = screen.getAllByRole('button', { name: /Delete/i });
+    fireEvent.click(deleteButtons[0]);
+
+    await waitFor(() => {
+      expect(screen.getByText('Are you sure you want to delete the task?')).toBeInTheDocument();
+    });
+
+    const deleteButtons2 = screen.getAllByRole('button', { name: /Delete/i });
+    fireEvent.click(deleteButtons2[0]);
+
+    await waitFor(() => {
+      expect(deleteTaskMock).toHaveBeenCalledWith(1);
+    });
+
+    expect(screen.queryByText('Task 1')).not.toBeInTheDocument();
   });
-//     render(<Upcoming />);
 
-//     await waitFor(() => {
-//       expect(screen.getByText('Task 1')).toBeInTheDocument();
-//     });
+  // it('shows error messages for form validation', async () => {
+  //   render(<Upcoming />);
 
-//     fireEvent.click(screen.getByText('Details', { selector: 'button' }));
+  //   fireEvent.click(screen.getByText('+ Add New Task'));
 
-//     await waitFor(() => {
-//       expect(screen.getByText('Edit Task')).toBeInTheDocument();
-//     });
+  //   await waitFor(() => {
+  //     expect(screen.getByText('Add Task')).toBeInTheDocument();
+  //   });
 
-//     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Updated Task 1' } });
-//     fireEvent.change(screen.getByLabelText('Description'), { target: { value: 'Updated Description 1' } });
-//     fireEvent.change(screen.getByLabelText('Due Date'), { target: { value: new Date().toISOString().split('T')[0] } });
-//     fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'In Progress' } });
-//     fireEvent.change(screen.getByLabelText('Category'), { target: { value: 'Personal' } });
+  //   fireEvent.click(screen.getByText('Add Task'));
 
-//     fireEvent.click(screen.getByText('Update Task'));
+  //   await waitFor(() => {
+  //     expect(screen.getByText('All fields are required.')).toBeInTheDocument();
+  //   });
 
-//     await waitFor(() => {
-//       expect(updateTask).toHaveBeenCalledWith(1, 'Personal', {
-//         title: 'Updated Task 1',
-//         description: 'Updated Description 1',
-//         duedate: new Date().toISOString().split('T')[0],
-//         status: 'In Progress',
-//       }, mockUser.id);
-//     });
+  //   fireEvent.change(screen.getByLabelText('Due Date'), { target: { value: '2020-01-01' } });
+  //   fireEvent.click(screen.getByText('Add Task'));
 
-//     expect(screen.queryByText('Edit Task')).not.toBeInTheDocument();
-//   });
-
-//   it('handles task deletion', async () => {
-//     render(<Upcoming />);
-
-//     await waitFor(() => {
-//       expect(screen.getByText('Task 1')).toBeInTheDocument();
-//     });
-
-//     fireEvent.click(screen.getByText('Delete', { selector: 'button' }));
-
-//     await waitFor(() => {
-//       expect(screen.getByText('Are you sure you want to delete the task?')).toBeInTheDocument();
-//     });
-
-//     fireEvent.click(screen.getByText('Delete', { selector: 'button' }));
-
-//     await waitFor(() => {
-//       expect(deleteTask).toHaveBeenCalledWith(1);
-//     });
-
-//     expect(screen.queryByText('Task 1')).not.toBeInTheDocument();
-//   });
-
-//   it('shows error messages for form validation', async () => {
-//     render(<Upcoming />);
-
-//     fireEvent.click(screen.getByText('+ Add New Task'));
-
-//     await waitFor(() => {
-//       expect(screen.getByText('Add Task')).toBeInTheDocument();
-//     });
-
-//     fireEvent.click(screen.getByText('Add Task'));
-
-//     await waitFor(() => {
-//       expect(screen.getByText('All fields are required.')).toBeInTheDocument();
-//     });
-
-//     fireEvent.change(screen.getByLabelText('Due Date'), { target: { value: '2020-01-01' } });
-//     fireEvent.click(screen.getByText('Add Task'));
-
-//     await waitFor(() => {
-//       expect(screen.getByText('Due date cannot be earlier than the current date.')).toBeInTheDocument();
-//     });
-//   });
+  //   await waitFor(() => {
+  //     expect(screen.getByText('Due date cannot be earlier than the current date.')).toBeInTheDocument();
+  //   });
+  // });
 });

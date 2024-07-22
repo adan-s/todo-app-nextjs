@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { addTask, updateTask, getUserTasks, deleteTask } from "@/serverApi/taskApi";
+import {
+  addTask,
+  updateTask,
+  getUserTasks,
+  deleteTask,
+} from "@/serverApi/taskApi";
 import { findUser } from "@/serverApi/userApi";
 
 const Upcoming = () => {
@@ -19,8 +24,10 @@ const Upcoming = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
 
-  const currentDate = new Date().toISOString().split('T')[0];
-  const tomorrowDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+  const currentDate = new Date().toISOString().split("T")[0];
+  const tomorrowDate = new Date(Date.now() + 86400000)
+    .toISOString()
+    .split("T")[0];
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -37,9 +44,9 @@ const Upcoming = () => {
 
   useEffect(() => {
     const fetchTasks = async () => {
-
       try {
         const fetchedTasks = await getUserTasks(userId);
+        console.log("Fetched Tasks:", fetchedTasks);
         setTasks(fetchedTasks || []);
       } catch (error) {
         setError("Error fetching tasks. Please try again.");
@@ -49,10 +56,18 @@ const Upcoming = () => {
     fetchTasks();
   }, [userId]);
 
-  const tasksToday = tasks.filter(task => task.duedate.split('T')[0] === currentDate);
-  const tasksTomorrow = tasks.filter(task => task.duedate.split('T')[0] === tomorrowDate);
-  const tasksUpcoming = tasks.filter(task => task.duedate.split('T')[0] > tomorrowDate);
-  const tasksPast = tasks.filter(task => task.duedate.split('T')[0] < currentDate);
+  const tasksToday = tasks.filter(
+    (task) => task.duedate.split("T")[0] === currentDate
+  );
+  const tasksTomorrow = tasks.filter(
+    (task) => task.duedate.split("T")[0] === tomorrowDate
+  );
+  const tasksUpcoming = tasks.filter(
+    (task) => task.duedate.split("T")[0] > tomorrowDate
+  );
+  const tasksPast = tasks.filter(
+    (task) => task.duedate.split("T")[0] < currentDate
+  );
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -65,12 +80,17 @@ const Upcoming = () => {
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic validation checks
-    if (formData.title.trim() === "" || formData.desc.trim() === "" || formData.duedate === "") {
+    if (
+      formData.title.trim() === "" ||
+      formData.desc.trim() === ""
+    ) {
       setError("All fields are required.");
       return;
     }
 
+    if (formData.duedate === "") {
+      formData.duedate = new Date(Date.now() + 86400000).toISOString().split("T")[0]
+    }
     if (formData.duedate < currentDate) {
       setError("Due date cannot be earlier than the current date.");
       return;
@@ -89,8 +109,20 @@ const Upcoming = () => {
           },
           userId
         );
-        setTasks(tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)));
+        setTasks(
+          tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
+        );
       } else {
+
+
+        // console.log("formdata in else:", formData);
+        // console.log("formdata title:", formData.title);
+        // console.log("formdata desc:", formData.desc);
+        // console.log("formdata duedate:", formData.duedate);
+        // console.log("formdata status:", formData.status);
+        // console.log("formdata category:", formData.category);
+//console.log("formdata userid:", fo);
+
         const newTask = await addTask(
           formData.title,
           formData.desc,
@@ -99,6 +131,9 @@ const Upcoming = () => {
           formData.category,
           userId
         );
+
+
+        console.log("new :", newTask);
         setTasks([...tasks, newTask]);
       }
 
@@ -133,7 +168,7 @@ const Upcoming = () => {
     try {
       if (taskToDelete) {
         await deleteTask(taskToDelete.id);
-        setTasks(tasks.filter(task => task.id !== taskToDelete.id));
+        setTasks(tasks.filter((task) => task.id !== taskToDelete.id));
         setTaskToDelete(null);
         setShowDeleteModal(false);
       }
@@ -172,11 +207,14 @@ const Upcoming = () => {
         ) : (
           <ul className="list-disc">
             {tasksToday.map((task) => (
-              <li key={task.id} className="flex items-center justify-between mb-2">
+              <li
+                key={task.id}
+                className="flex items-center justify-between mb-2"
+              >
                 <span className="flex items-center">
                   <span>{task.title}</span>
                 </span>
-              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4">
                   <button
                     onClick={() => handleEditTask(task)}
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
@@ -206,11 +244,14 @@ const Upcoming = () => {
         ) : (
           <ul className="list-disc">
             {tasksTomorrow.map((task) => (
-              <li key={task.id} className="flex items-center justify-between mb-2">
+              <li
+                key={task.id}
+                className="flex items-center justify-between mb-2"
+              >
                 <span className="flex items-center">
                   <span>{task.title}</span>
                 </span>
-              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4">
                   <button
                     onClick={() => handleEditTask(task)}
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
@@ -240,11 +281,14 @@ const Upcoming = () => {
         ) : (
           <ul className="list-disc">
             {tasksUpcoming.map((task) => (
-              <li key={task.id} className="flex items-center justify-between mb-2">
+              <li
+                key={task.id}
+                className="flex items-center justify-between mb-2"
+              >
                 <span className="flex items-center">
                   <span>{task.title}</span>
                 </span>
-              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-4">
                   <button
                     onClick={() => handleEditTask(task)}
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded focus:outline-none focus:shadow-outline"
@@ -274,7 +318,10 @@ const Upcoming = () => {
         ) : (
           <ul className="list-disc">
             {tasksPast.map((task) => (
-              <li key={task.id} className="flex items-center justify-between mb-2">
+              <li
+                key={task.id}
+                className="flex items-center justify-between mb-2"
+              >
                 <span className="flex items-center">
                   <span>{task.title}</span>
                 </span>
@@ -301,12 +348,13 @@ const Upcoming = () => {
         )}
       </div>
 
-
       {showDeleteModal && (
         <div className="fixed inset-0 flex items-center justify-center">
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50"></div>
           <div className="bg-white p-6 rounded-lg shadow-md z-10">
-            <p className="text-lg font-semibold mb-4">Are you sure you want to delete the task?</p>
+            <p className="text-lg font-semibold mb-4">
+              Are you sure you want to delete the task?
+            </p>
             <div className="flex justify-end space-x-4">
               <button
                 onClick={() => {
@@ -335,11 +383,14 @@ const Upcoming = () => {
                 {selectedTask ? "Edit Task" : "Add Task"}
               </h2>
               <div className="mb-4">
-                <label htmlFor="title" className="block text-gray-700 text-sm font-bold mb-2">
+                <label
+                  htmlFor="title"
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                >
                   Title
                 </label>
                 <input
-                id="title"
+                  id="title"
                   type="text"
                   name="title"
                   value={formData.title}
@@ -348,11 +399,14 @@ const Upcoming = () => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="desc" className="block text-gray-700 text-sm font-bold mb-2">
+                <label
+                  htmlFor="desc"
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                >
                   Description
                 </label>
                 <textarea
-                id="desc"
+                  id="desc"
                   name="desc"
                   value={formData.desc}
                   onChange={handleFormChange}
@@ -360,11 +414,14 @@ const Upcoming = () => {
                 ></textarea>
               </div>
               <div className="mb-4">
-                <label htmlFor="duedate" className="block text-gray-700 text-sm font-bold mb-2">
+                <label
+                  htmlFor="duedate"
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                >
                   Due Date
                 </label>
                 <input
-                id="duedate"
+                  id="duedate"
                   type="date"
                   name="duedate"
                   value={formData.duedate}
@@ -373,11 +430,14 @@ const Upcoming = () => {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="status" className="block text-gray-700 text-sm font-bold mb-2">
+                <label
+                  htmlFor="status"
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                >
                   Status
                 </label>
                 <select
-                id="status"
+                  id="status"
                   name="status"
                   value={formData.status}
                   onChange={handleFormChange}
@@ -389,11 +449,14 @@ const Upcoming = () => {
                 </select>
               </div>
               <div className="mb-4">
-                <label htmlFor="category" className="block text-gray-700 text-sm font-bold mb-2">
+                <label
+                  htmlFor="category"
+                  className="block text-gray-700 text-sm font-bold mb-2"
+                >
                   Category
                 </label>
                 <select
-                id="category"
+                  id="category"
                   name="category"
                   value={formData.category}
                   onChange={handleFormChange}
