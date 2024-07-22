@@ -62,6 +62,8 @@ const Other = () => {
     }));
   };
 
+  const currentDate = new Date().toISOString().split('T')[0];
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
@@ -71,7 +73,6 @@ const Other = () => {
       return;
     }
 
-    const currentDate = new Date().toISOString().split('T')[0];
     if (formData.duedate < currentDate) {
       setError("Due date cannot be earlier than the current date.");
       return;
@@ -223,13 +224,13 @@ const Other = () => {
                 }}
                 className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
-                Cancel
+                No
               </button>
               <button
                 onClick={handleDeleteTask}
                 className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
-                Delete
+                Yes
               </button>
             </div>
           </div>
@@ -238,14 +239,16 @@ const Other = () => {
 
       {/* Popup Form */}
       {isFormOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 shadow-lg">
-            <h2 className="text-2xl font-bold mb-4">
-              {selectedTask ? "Edit Task" : "Add New Task"}
-            </h2>
+        
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg">
             <form onSubmit={handleFormSubmit}>
+           
+              <h2 className="text-lg font-medium mb-4">
+                {selectedTask ? "Edit Task" : "Add Task"}
+              </h2>
               <div className="mb-4">
-                <label
+              <label
                   className="block text-gray-700 text-sm font-bold mb-2"
                   htmlFor="title"
                 >
@@ -304,16 +307,16 @@ const Other = () => {
                   }`}
                 />
                 {error && formData.duedate === "" && (
-                  <p className="text-red-500 text-xs italic">Due date is required.</p>
+                  <p className="text-red-500 text-xs italic">Due Date is required.</p>
                 )}
-                {error && formData.duedate < new Date().toISOString().split('T')[0] && (
-                  <p className="text-red-500 text-xs italic">Due date cannot be earlier than the current date.</p>
+                {error && formData.duedate < currentDate && (
+                  <p className="text-red-500 text-xs italic">Due Date cannot be earlier than the current date.</p>
                 )}
               </div>
               <div className="mb-4">
                 <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
                   htmlFor="status"
+                  className="block text-gray-700 text-sm font-bold mb-2"
                 >
                   Status
                 </label>
@@ -322,17 +325,17 @@ const Other = () => {
                   name="status"
                   value={formData.status}
                   onChange={handleFormChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="w-full p-2 border border-gray-300 rounded"
                 >
                   <option value="New">New</option>
-                  <option value="Ongoing">Ongoing</option>
-                  <option value="Finished">Finished</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
                 </select>
               </div>
               <div className="mb-4">
                 <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
                   htmlFor="category"
+                  className="block text-gray-700 text-sm font-bold mb-2"
                 >
                   Category
                 </label>
@@ -341,10 +344,10 @@ const Other = () => {
                   name="category"
                   value={formData.category}
                   onChange={handleFormChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  className="w-full p-2 border border-gray-300 rounded"
                 >
-                  <option value="Other">Other</option>
-                  <option value="Other">Other</option>
+                  <option value="Work">Work</option>
+                  <option value="Personal">Personal</option>
                   <option value="Other">Other</option>
                 </select>
               </div>
@@ -353,11 +356,12 @@ const Other = () => {
                   type="submit"
                   className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 >
-                  {selectedTask ? "Save Changes" : "Add Task"}
+                  {selectedTask ? "Update Task" : "Add Task"}
                 </button>
                 <button
+                  type="button"
                   onClick={() => setIsFormOpen(false)}
-                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                  className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 >
                   Cancel
                 </button>

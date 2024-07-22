@@ -7,7 +7,7 @@ import {
   fireEvent,
 } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import Upcoming from "@/components/Upcoming";
+import Today from "@/components/Today";
 
 const getUserTasksMock = jest.fn();
 const addTaskMock = jest.fn();
@@ -43,7 +43,7 @@ jest.mock("@/serverApi/userApi", () => ({
   findUser: (email: string) => findUserMock(email),
 }));
 
-describe("Upcoming Component", () => {
+describe("Today Component", () => {
   const mockUser = { id: 1, email: "test@example.com" };
   const mockTasks = [
     {
@@ -97,10 +97,10 @@ describe("Upcoming Component", () => {
   });
 
   it("renders component and fetches tasks", async () => {
-    await act(async () => render(<Upcoming />));
+    await act(async () => render(<Today />));
 
     expect(
-      screen.getByRole("heading", { level: 1, name: /Upcoming/i })
+      screen.getByRole("heading", { level: 1, name: /Today/i })
     ).toBeInTheDocument();
     expect(screen.getByText("+ Add New Task")).toBeInTheDocument();
 
@@ -125,7 +125,7 @@ describe("Upcoming Component", () => {
       user_id: mockUser.id,
     });
 
-    render(<Upcoming />);
+    render(<Today />);
 
     fireEvent.click(screen.getByText("+ Add New Task"));
 
@@ -166,7 +166,7 @@ describe("Upcoming Component", () => {
   });
 
   it("handles task update", async () => {
-    render(<Upcoming />);
+    render(<Today />);
 
     await waitFor(() => {
       expect(screen.getByText("Task 1")).toBeInTheDocument();
@@ -213,7 +213,7 @@ describe("Upcoming Component", () => {
   });
 
   it("handles task deletion", async () => {
-    render(<Upcoming />);
+    render(<Today />);
 
     await waitFor(() => {
       expect(screen.getByText("Task 1")).toBeInTheDocument();
@@ -237,7 +237,7 @@ describe("Upcoming Component", () => {
   });
 
   it("shows error messages for form validation", async () => {
-    render(<Upcoming />);
+    render(<Today />);
 
     fireEvent.click(screen.getByText("+ Add New Task"));
 

@@ -114,15 +114,6 @@ const Upcoming = () => {
         );
       } else {
 
-
-        // console.log("formdata in else:", formData);
-        // console.log("formdata title:", formData.title);
-        // console.log("formdata desc:", formData.desc);
-        // console.log("formdata duedate:", formData.duedate);
-        // console.log("formdata status:", formData.status);
-        // console.log("formdata category:", formData.category);
-//console.log("formdata userid:", fo);
-
         const newTask = await addTask(
           formData.title,
           formData.desc,
@@ -363,71 +354,94 @@ const Upcoming = () => {
                 }}
                 className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
-                Cancel
+                No
               </button>
               <button
                 onClick={handleDeleteTask}
                 className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               >
-                Delete
+                Yes
               </button>
             </div>
           </div>
         </div>
       )}
+
+      
       {isFormOpen && (
+        
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <form onSubmit={handleFormSubmit}>
+           
               <h2 className="text-lg font-medium mb-4">
                 {selectedTask ? "Edit Task" : "Add Task"}
               </h2>
               <div className="mb-4">
-                <label
-                  htmlFor="title"
+              <label
                   className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="title"
                 >
                   Title
                 </label>
                 <input
-                  id="title"
                   type="text"
+                  id="title"
                   name="title"
                   value={formData.title}
                   onChange={handleFormChange}
-                  className="w-full p-2 border border-gray-300 rounded"
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                    error && formData.title.trim() === "" ? "border-red-500" : ""
+                  }`}
                 />
+                {error && formData.title.trim() === "" && (
+                  <p className="text-red-500 text-xs italic">Title is required.</p>
+                )}
               </div>
               <div className="mb-4">
                 <label
-                  htmlFor="desc"
                   className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="desc"
                 >
                   Description
                 </label>
-                <textarea
+                <input
+                  type="text"
                   id="desc"
                   name="desc"
                   value={formData.desc}
                   onChange={handleFormChange}
-                  className="w-full p-2 border border-gray-300 rounded"
-                ></textarea>
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                    error && formData.desc.trim() === "" ? "border-red-500" : ""
+                  }`}
+                />
+                {error && formData.desc.trim() === "" && (
+                  <p className="text-red-500 text-xs italic">Description is required.</p>
+                )}
               </div>
               <div className="mb-4">
                 <label
-                  htmlFor="duedate"
                   className="block text-gray-700 text-sm font-bold mb-2"
+                  htmlFor="duedate"
                 >
                   Due Date
                 </label>
                 <input
-                  id="duedate"
                   type="date"
+                  id="duedate"
                   name="duedate"
                   value={formData.duedate}
                   onChange={handleFormChange}
-                  className="w-full p-2 border border-gray-300 rounded"
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                    error && formData.duedate === "" ? "border-red-500" : ""
+                  }`}
                 />
+                {error && formData.duedate === "" && (
+                  <p className="text-red-500 text-xs italic">Due Date is required.</p>
+                )}
+                {error && formData.duedate < currentDate && (
+                  <p className="text-red-500 text-xs italic">Due Date cannot be earlier than the current date.</p>
+                )}
               </div>
               <div className="mb-4">
                 <label
