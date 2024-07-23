@@ -82,7 +82,6 @@ describe("Upcoming Component", () => {
       if (email === mockUser.email) {
         return Promise.resolve(mockUser.id);
       }
-      return Promise.reject(new Error("User not found"));
     });
 
     getUserTasksMock.mockImplementation((id) => {
