@@ -15,6 +15,29 @@ const findUserMock = jest.fn();
 const updateTaskMock = jest.fn();
 const deleteTaskMock = jest.fn();
 
+const localStorageMock = (function () {
+  let store: any = {};
+
+  return {
+    getItem: function (key: any) {
+      return store[key] || null;
+    },
+    setItem: function (key: any, value: any) {
+      store[key] = value.toString();
+    },
+    removeItem: function (key: any) {
+      delete store[key];
+    },
+    clear: function () {
+      store = {};
+    },
+  };
+})();
+
+Object.defineProperty(window, "localStorage", {
+  value: localStorageMock,
+});
+
 jest.mock("@/serverApi/taskApi", () => ({
   addTask: (
     title: string,
@@ -76,7 +99,7 @@ describe("Upcoming Component", () => {
   ];
 
   beforeEach(() => {
-    localStorage.setItem("loggedInUser", JSON.stringify(mockUser.email));
+    localStorageMock.setItem("loggedInUser", JSON.stringify(mockUser.email));
 
     findUserMock.mockImplementation((email) => {
       if (email === mockUser.email) {
@@ -93,6 +116,7 @@ describe("Upcoming Component", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    localStorageMock.clear();
   });
 
   it("renders component and fetches tasks", async () => {
