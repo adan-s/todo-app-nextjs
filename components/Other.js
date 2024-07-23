@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getUserTasks, addTask, updateTask,deleteTask } from "@/serverApi/taskApi";
 import { findUser } from "@/serverApi/userApi";
+import Checkbox from "@mui/material/Checkbox";
 
 const Other = () => {
   const userEmail = JSON.parse(localStorage.getItem("loggedInUser"));
@@ -186,7 +187,8 @@ const Other = () => {
                 className="flex items-center justify-between mb-2"
               >
                 <span className="flex items-center">
-                  <span>{task.title}</span>
+                <Checkbox checked={task.status === "Completed"} />
+                <span className={`ml-2   `}>{task.title}</span>
                 </span>
                 <div className="flex items-center space-x-4">
                   <button

@@ -7,8 +7,8 @@ import Today from "./Today";
 import Work from "./Work";
 import Personal from "./Personal";
 import Other from "./Other";
-import { getCategory } from "@/serverApi/categoryApi";
 import Profile from "./Profile";
+import { getCategory } from "@/serverApi/categoryApi";
 import {
   UserCircleIcon,
   BriefcaseIcon,
@@ -39,11 +39,9 @@ const ToDo = () => {
     router.push('/SignIn');
   };
 
-
   if (isLoggedIn) {
     return null;
   }
-
 
   return (
     <div className="container flex h-screen">
@@ -61,14 +59,14 @@ const ToDo = () => {
               <li
                 className={`py-2 ${
                   currentView === "upcoming"
-                    ? "font-bold text-orange-500 "
-                    : "text-black "
+                    ? "font-bold text-orange-500"
+                    : "text-black"
                 }`}
                 onClick={() => setCurrentView("upcoming")}
               >
                 <a href="#" className="flex items-center">
                   <InboxInIcon
-                    className={`h-5 w-5 mr-2  ${
+                    className={`h-5 w-5 mr-2 ${
                       currentView === "upcoming"
                         ? "text-orange-500"
                         : "text-gray-500"
@@ -80,14 +78,14 @@ const ToDo = () => {
               <li
                 className={`py-2 ${
                   currentView === "today"
-                    ? "font-bold text-orange-500 "
-                    : "text-black "
+                    ? "font-bold text-orange-500"
+                    : "text-black"
                 }`}
                 onClick={() => setCurrentView("today")}
               >
                 <a href="#" className="flex items-center">
                   <CheckIcon
-                    className={`h-5 w-5 mr-2  ${
+                    className={`h-5 w-5 mr-2 ${
                       currentView === "today"
                         ? "text-orange-500"
                         : "text-gray-500"
@@ -108,15 +106,15 @@ const ToDo = () => {
                   key={category.category_name}
                   className={`py-2 ${
                     currentView === category.category_name.toLowerCase()
-                      ? "font-bold text-orange-500 "
-                      : "text-black "
+                      ? "font-bold text-orange-500"
+                      : "text-black"
                   }`}
                   onClick={() => setCurrentView(category.category_name.toLowerCase())}
                 >
                   <a href="#" className="flex items-center">
                     {category.category_name === "Work" && (
                       <BriefcaseIcon
-                        className={`h-5 w-5 mr-2  ${
+                        className={`h-5 w-5 mr-2 ${
                           currentView === "work"
                             ? "text-orange-500"
                             : "text-gray-500"
@@ -125,7 +123,7 @@ const ToDo = () => {
                     )}
                     {category.category_name === "Personal" && (
                       <UserCircleIcon
-                        className={`h-5 w-5 mr-2  ${
+                        className={`h-5 w-5 mr-2 ${
                           currentView === "personal"
                             ? "text-orange-500"
                             : "text-gray-500"
@@ -134,7 +132,7 @@ const ToDo = () => {
                     )}
                     {category.category_name === "Other" && (
                       <DotsCircleHorizontalIcon
-                        className={`h-5 w-5 mr-2  ${
+                        className={`h-5 w-5 mr-2 ${
                           currentView === "other"
                             ? "text-orange-500"
                             : "text-gray-500"
@@ -148,21 +146,21 @@ const ToDo = () => {
             </ul>
           </div>
           <div>
-          <h3 className="text-lg font-semibold text-black mb-2 flex items-center">
+            <h3 className="text-lg font-semibold text-black mb-2 flex items-center">
               Account
             </h3>
             <ul>
-            <li
+              <li
                 className={`py-2 ${
                   currentView === "profile"
-                    ? "font-bold text-orange-500 "
-                    : "text-black "
+                    ? "font-bold text-orange-500"
+                    : "text-black"
                 }`}
                 onClick={() => setCurrentView("profile")}
               >
                 <a href="#" className="flex items-center">
                   <UserIcon
-                    className={`h-5 w-5 mr-2  ${
+                    className={`h-5 w-5 mr-2 ${
                       currentView === "profile"
                         ? "text-orange-500"
                         : "text-gray-500"
@@ -200,9 +198,8 @@ const ToDo = () => {
       {/* Other Area */}
       {currentView === "other" && <Other />}
 
-       {/* Profile Area */}
-       {currentView === "profile" && <Profile />}
-
+      {/* Profile Area */}
+      {currentView === "profile" && <Profile />}
     </div>
   );
 };
