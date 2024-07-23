@@ -165,14 +165,6 @@ const Work = () => {
 
   const WorkTasks = tasks.filter((task) => task.category_name === "Work");
 
-  if (!userId) {
-    return (
-      <p className="text-red-500 mt-96 ml-96 p-2 pt-6 border border-red-500 rounded h-20 items-center justify-center">
-        You are not Logged In. Kindly click on SignOut to redirect on
-        SignIn Page.
-      </p>
-    );
-  }
   
   return (
     <div className="container mx-auto p-10">
