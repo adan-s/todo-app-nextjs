@@ -29,9 +29,7 @@ const localStorageMock = (function () {
     getItem: function (key: any) {
       return store[key] || null;
     },
-    setItem: function (key: any, value: any) {
-      store[key] = value.toString();
-    },
+   
     removeItem: function (key: any) {
       delete store[key];
     },
@@ -111,7 +109,7 @@ describe("SignIn", () => {
     fireEvent.click(screen.getByText("Login"));
 
     await waitFor(() => {
-      expect(localStorage.getItem("loggedInUser")).toBe(
+      expect(localStorageMock.getItem("loggedInUser")).toBe(
         JSON.stringify("example@gmail.com")
       );
       expect(mockPush).toHaveBeenCalledWith("/ToDo");
