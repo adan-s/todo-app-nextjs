@@ -89,14 +89,6 @@ const Upcoming = () => {
       return;
     }
 
-    if (formData.duedate === "") {
-      formData.duedate = new Date(Date.now() + 86400000).toISOString().split("T")[0]
-    }
-    if (formData.duedate < currentDate) {
-      setError("Due date cannot be earlier than the current date.");
-      return;
-    }
-
     try {
       if (selectedTask) {
         const updatedTask = await updateTask(
