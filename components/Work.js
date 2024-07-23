@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { getUserTasks, addTask, updateTask,deleteTask } from "@/serverApi/taskApi";
+import {
+  getUserTasks,
+  addTask,
+  updateTask,
+  deleteTask,
+} from "@/serverApi/taskApi";
 import { findUser } from "@/serverApi/userApi";
 
 const Work = () => {
@@ -24,6 +29,9 @@ const Work = () => {
       try {
         const id = await findUser(userEmail);
         setUserId(id);
+
+        
+
         console.log("userid:", id);
       } catch (error) {
         console.error("Error fetching user ID:", error);
@@ -36,13 +44,14 @@ const Work = () => {
 
   useEffect(() => {
     const fetchTasks = async () => {
-      if (!userId) 
-      {  setError("Error! You are not logged in.");
-      return;}
+      if (!userId) {
+        setError("Error! You are not logged in.");
+        return;
+      }
 
       try {
         const fetchedTasks = await getUserTasks(userId);
-        console.log("userid:",userId);
+        console.log("userid:", userId);
         console.log(fetchedTasks);
         setTasks(fetchedTasks || []);
       } catch (error) {
@@ -52,8 +61,7 @@ const Work = () => {
     };
 
     fetchTasks();
-  },[userId]);
-
+  }, [userId]);
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -63,14 +71,17 @@ const Work = () => {
     }));
   };
 
+  const currentDate = new Date().toISOString().split("T")[0];
 
-  const currentDate = new Date().toISOString().split('T')[0];
-  
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
     // Basic validation checks
-    if (formData.title.trim() === "" || formData.desc.trim() === "" || formData.duedate === "") {
+    if (
+      formData.title.trim() === "" ||
+      formData.desc.trim() === "" ||
+      formData.duedate === ""
+    ) {
       setError("All fields are required.");
       return;
     }
@@ -94,7 +105,9 @@ const Work = () => {
           },
           userId
         );
-        setTasks(tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task)));
+        setTasks(
+          tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
+        );
 
         console.log("Updated task:", updatedTask);
       } else {
@@ -137,12 +150,11 @@ const Work = () => {
     setIsFormOpen(true);
   };
 
-
   const handleDeleteTask = async () => {
     try {
       if (taskToDelete) {
         await deleteTask(taskToDelete.id);
-        setTasks(tasks.filter(task => task.id !== taskToDelete.id));
+        setTasks(tasks.filter((task) => task.id !== taskToDelete.id));
         setTaskToDelete(null);
         setShowDeleteModal(false);
       }
@@ -151,9 +163,17 @@ const Work = () => {
     }
   };
 
+  const WorkTasks = tasks.filter((task) => task.category_name === "Work");
 
-  const WorkTasks = tasks.filter(task => task.category_name === "Work");
-
+  if (!userId) {
+    return (
+      <p className="text-red-500 mt-96 ml-96 p-2 pt-6 border border-red-500 rounded h-20 items-center justify-center">
+        You are not Logged In. Kindly click on SignOut to redirect on
+        SignIn Page.
+      </p>
+    );
+  }
+  
   return (
     <div className="container mx-auto p-10">
       <div className="flex items-center justify-between mb-2">
@@ -214,11 +234,13 @@ const Work = () => {
         </div>
       )}
 
-{showDeleteModal && (
+      {showDeleteModal && (
         <div className="fixed inset-0 flex items-center justify-center">
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50"></div>
           <div className="bg-white p-6 rounded-lg shadow-md z-10">
-            <p className="text-lg font-semibold mb-4">Are you sure you want to delete the task?</p>
+            <p className="text-lg font-semibold mb-4">
+              Are you sure you want to delete the task?
+            </p>
             <div className="flex justify-end space-x-4">
               <button
                 onClick={() => {
@@ -242,16 +264,14 @@ const Work = () => {
 
       {/* Popup Form */}
       {isFormOpen && (
-        
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg">
             <form onSubmit={handleFormSubmit}>
-           
               <h2 className="text-lg font-medium mb-4">
                 {selectedTask ? "Edit Task" : "Add Task"}
               </h2>
               <div className="mb-4">
-              <label
+                <label
                   className="block text-gray-700 text-sm font-bold mb-2"
                   htmlFor="title"
                 >
@@ -264,11 +284,15 @@ const Work = () => {
                   value={formData.title}
                   onChange={handleFormChange}
                   className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                    error && formData.title.trim() === "" ? "border-red-500" : ""
+                    error && formData.title.trim() === ""
+                      ? "border-red-500"
+                      : ""
                   }`}
                 />
                 {error && formData.title.trim() === "" && (
-                  <p className="text-red-500 text-xs italic">Title is required.</p>
+                  <p className="text-red-500 text-xs italic">
+                    Title is required.
+                  </p>
                 )}
               </div>
               <div className="mb-4">
@@ -289,7 +313,9 @@ const Work = () => {
                   }`}
                 />
                 {error && formData.desc.trim() === "" && (
-                  <p className="text-red-500 text-xs italic">Description is required.</p>
+                  <p className="text-red-500 text-xs italic">
+                    Description is required.
+                  </p>
                 )}
               </div>
               <div className="mb-4">
@@ -310,10 +336,14 @@ const Work = () => {
                   }`}
                 />
                 {error && formData.duedate === "" && (
-                  <p className="text-red-500 text-xs italic">Due Date is required.</p>
+                  <p className="text-red-500 text-xs italic">
+                    Due Date is required.
+                  </p>
                 )}
                 {error && formData.duedate < currentDate && (
-                  <p className="text-red-500 text-xs italic">Due Date cannot be earlier than the current date.</p>
+                  <p className="text-red-500 text-xs italic">
+                    Due Date cannot be earlier than the current date.
+                  </p>
                 )}
               </div>
               <div className="mb-4">
