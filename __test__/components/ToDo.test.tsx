@@ -1,5 +1,4 @@
 import ToDo from "@/components/ToDo";
-import { getCategory } from "@/serverApi/categoryApi";
 import "@testing-library/jest-dom";
 import {
   render,
@@ -14,8 +13,10 @@ jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
 }));
 
+const getCategoryMock = jest.fn();
+
 jest.mock('@/serverApi/categoryApi', () => ({
-  getCategory: jest.fn(),
+  getCategory: () =>  getCategoryMock(),
 }));
 
 describe('ToDo Component', () => {
@@ -23,18 +24,18 @@ describe('ToDo Component', () => {
 
   beforeEach(() => {
     (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
-    (getCategory as jest.Mock).mockResolvedValue([
-        { category_name: 'Work' },
-        { category_name: 'Personal' },
-        { category_name: 'Other' },
-      ]);
+    getCategoryMock.mockResolvedValue([
+      { category_name: 'Work' },
+      { category_name: 'Personal' },
+      { category_name: 'Other' },
+    ]);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders ToDo component ', async () => {
+  it('renders ToDo component', async () => {
     render(<ToDo />);
 
     expect(screen.getByText('TODO-Wise')).toBeInTheDocument();
@@ -50,30 +51,30 @@ describe('ToDo Component', () => {
     render(<ToDo />);
 
     await waitFor(() => {
-        expect(screen.getByRole('button', { name: /Add New Task/i }));
+      expect(screen.getByRole('button', { name: /Add New Task/i })).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole('link', { name: /Today/i }));
-    expect(screen.getByRole('link', { name: /Today/i }));
+    expect(screen.getByRole('link', { name: /Today/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('link', { name: /Work/i }));
-    expect(screen.getByRole('link', { name: /Work/i }));
+    expect(screen.getByRole('link', { name: /Work/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('link', { name: /Personal/i }));
-    expect(screen.getByRole('link', { name: /Personal/i }));
+    expect(screen.getByRole('link', { name: /Personal/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('link', { name: /Other/i }));
-    expect(screen.getByRole('link', { name: /Other/i }));
+    expect(screen.getByRole('link', { name: /Other/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('link', { name: /Profile/i }));
-    expect(screen.getByRole('link', { name: /Profile/i }));
+    expect(screen.getByRole('link', { name: /Profile/i })).toBeInTheDocument();
   });
 
   it('fetches and displays categories', async () => {
     render(<ToDo />);
 
     await waitFor(() => {
-      expect(getCategory).toHaveBeenCalled();
+      expect(getCategoryMock).toHaveBeenCalled();
       expect(screen.getByText('Work')).toBeInTheDocument();
       expect(screen.getByText('Personal')).toBeInTheDocument();
       expect(screen.getByText('Other')).toBeInTheDocument();
