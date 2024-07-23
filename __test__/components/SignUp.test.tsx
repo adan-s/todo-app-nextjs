@@ -1,5 +1,4 @@
 import SignUp from "@/components/SignUp";
-import { getUser } from "@/serverApi/userApi";
 import "@testing-library/jest-dom";
 import {
   render,
@@ -14,8 +13,12 @@ jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
 }));
 
+
+const mockUseGetUser=jest.fn();
+
+
 jest.mock("@/serverApi/userApi", () => ({
-  getUser: jest.fn(),
+  getUser: ()=> mockUseGetUser(),
   addUser: jest.fn().mockResolvedValue({ success: true }),
   getUsers: jest
     .fn()
@@ -58,8 +61,6 @@ describe("SignUp", () => {
   it("shows an error if the user already exists", async () => {
     await act(async () => render(<SignUp />));
 
-    const mockUseGetUser = getUser as jest.Mock;
-
     mockUseGetUser.mockImplementation(() => {
       return {
         email: "example@gmail.com",
@@ -89,7 +90,6 @@ describe("SignUp", () => {
   it("signs up the user and redirects to /ToDo on success", async () => {
     await act(async () => render(<SignUp />));
 
-    const mockUseGetUser = getUser as jest.Mock;
     mockUseGetUser.mockImplementation(() => {
       return {
         email: false,
