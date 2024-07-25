@@ -88,12 +88,10 @@ describe("SignUp", () => {
   });
 
   it("signs up the user and redirects to /ToDo on success", async () => {
-    await act(async () => render(<SignUp />));
+     render(<SignUp />);
 
     mockUseGetUser.mockImplementation(() => {
-      return {
-        email: false,
-      };
+      return null;
     });
 
     fireEvent.click(screen.getByText(/Get Started/i));
