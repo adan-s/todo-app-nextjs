@@ -40,7 +40,7 @@ const jestConfig = {
     "src/(.*)": "<rootDir>/src/$1",
     "@pages/(.*)": "<rootDir>/src/app/$1",
     "@/components/(.*)": "<rootDir>/src/components/$1",
-    "@/serverApi/(.*)": "<rootDir>/serverApi/$1", // Correct alias for serverApi
+    "@/serverApi/(.*)": "<rootDir>/serverApi/$1", 
     "@/context/(.*)": "<rootDir>/src/context/$1",
     "@/lib/(.*)": "<rootDir>/src/lib/$1",
     "@/network/(.*)": "<rootDir>/src/network/$1",

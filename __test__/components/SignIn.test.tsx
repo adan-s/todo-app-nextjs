@@ -15,9 +15,7 @@ jest.mock("next/navigation", () => ({
 }));
 
 jest.mock("@/serverApi/userApi", () => ({
-  getUsers: jest
-    .fn()
-    .mockResolvedValue([
+  getUsers: jest.fn().mockResolvedValue([
       { email: "example@gmail.com", password: "password123" },
     ]),
 }));
@@ -101,7 +99,7 @@ describe("SignIn", () => {
   });
 
   it("logs in the user if the credentials are correct", async () => {
-    await act(async () => await render(<SignIn />));
+    await act(async () =>  render(<SignIn />));
 
     const emailInput = screen.getByLabelText("Email") as HTMLInputElement;
     const passwordInput = screen.getByLabelText("Password") as HTMLInputElement;
